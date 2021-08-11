@@ -1,0 +1,36 @@
+syntax = "proto3";
+package demo;
+
+option go_package = "github.com/Junedayday/micro_web_service/gen/idl/demo";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+message DemoRequest {
+   string value = 1;
+}
+
+message DemoResponse {
+   int32 code = 1;
+}
+
+// 样例服务
+service DemoService {
+
+  // Echo 样例接口
+  rpc Echo(DemoRequest) returns (DemoResponse) {
+    option (google.api.http) = {
+      post : "/apis/demo"
+      body : "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      deprecated : true
+      external_docs : {
+        url : "https://github.com/grpc-ecosystem/grpc-gateway"
+        description : "Find out more about the interface"
+      }
+      security : {}
+    };
+  }
+}
