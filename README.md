@@ -1,5 +1,14 @@
 # micro_web_service
-build a micro web service for go users
+
+**Build a micro web service for go users.**
+
+本框架的初衷是**分享并理解常用的Go语言工具**，其次才是做一个易用的框架。方便使用者有任何定制修改时，可以快速fork并自己实现。
+
+## 目录介绍
+
+- **idl** 用`protobuf`定义的IDL文件，用于生成`Go`以及其它语言的数据结构
+- **gen** 从idl生成的文件，不允许手动修改
+- **internal** 项目内部的重要实现
 
 ## 手工安装
 
