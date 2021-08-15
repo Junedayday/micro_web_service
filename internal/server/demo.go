@@ -11,3 +11,7 @@ func (s *Server) Echo(ctx context.Context, req *demo.DemoRequest) (*demo.DemoRes
 		Code: 0,
 	}, nil
 }
+
+func (s *Server) Empty(ctx context.Context, req *demo.EmptyMessage) (*demo.EmptyMessage, error) {
+	return &demo.EmptyMessage{}, nil
+}

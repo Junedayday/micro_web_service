@@ -19,6 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 type DemoServiceClient interface {
 	// Echo 样例接口
 	Echo(ctx context.Context, in *DemoRequest, opts ...grpc.CallOption) (*DemoResponse, error)
+	// Empty 空接口
+	Empty(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*EmptyMessage, error)
 }
 
 type demoServiceClient struct {
@@ -38,12 +40,23 @@ func (c *demoServiceClient) Echo(ctx context.Context, in *DemoRequest, opts ...g
 	return out, nil
 }
 
+func (c *demoServiceClient) Empty(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*EmptyMessage, error) {
+	out := new(EmptyMessage)
+	err := c.cc.Invoke(ctx, "/demo.DemoService/Empty", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DemoServiceServer is the server API for DemoService service.
 // All implementations must embed UnimplementedDemoServiceServer
 // for forward compatibility
 type DemoServiceServer interface {
 	// Echo 样例接口
 	Echo(context.Context, *DemoRequest) (*DemoResponse, error)
+	// Empty 空接口
+	Empty(context.Context, *EmptyMessage) (*EmptyMessage, error)
 	mustEmbedUnimplementedDemoServiceServer()
 }
 
@@ -53,6 +66,9 @@ type UnimplementedDemoServiceServer struct {
 
 func (UnimplementedDemoServiceServer) Echo(context.Context, *DemoRequest) (*DemoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+}
+func (UnimplementedDemoServiceServer) Empty(context.Context, *EmptyMessage) (*EmptyMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Empty not implemented")
 }
 func (UnimplementedDemoServiceServer) mustEmbedUnimplementedDemoServiceServer() {}
 
@@ -85,6 +101,24 @@ func _DemoService_Echo_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DemoService_Empty_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServiceServer).Empty(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.DemoService/Empty",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServiceServer).Empty(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _DemoService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "demo.DemoService",
 	HandlerType: (*DemoServiceServer)(nil),
@@ -92,6 +126,10 @@ var _DemoService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Echo",
 			Handler:    _DemoService_Echo_Handler,
+		},
+		{
+			MethodName: "Empty",
+			Handler:    _DemoService_Empty_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
