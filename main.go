@@ -13,6 +13,7 @@ import (
 
 	"github.com/Junedayday/micro_web_service/gen/idl/demo"
 	"github.com/Junedayday/micro_web_service/internal/config"
+	"github.com/Junedayday/micro_web_service/internal/mysql"
 	"github.com/Junedayday/micro_web_service/internal/server"
 	"github.com/Junedayday/micro_web_service/internal/zlog"
 )
@@ -45,6 +46,15 @@ func main() {
 	zlog.Init(config.Viper.GetString("zlog.path"))
 	defer zlog.Sync()
 	zlog.Sugar.Info("server is running")
+
+	// mysql初始化失败的话，不要继续运行程序
+	if err := mysql.Init(config.Viper.GetString("mysql.user"),
+		config.Viper.GetString("mysql.password"),
+		config.Viper.GetString("mysql.ip"),
+		config.Viper.GetInt("mysql.port"),
+		config.Viper.GetString("mysql.dbname")); err != nil {
+		zlog.Sugar.Fatalf("init mysql error %v", err)
+	}
 
 	go func() {
 		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", config.Viper.GetInt("server.grpc.port")))
