@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/Junedayday/micro_web_service/internal/model"
 )
 
 // 注意，我们使用的是gorm 2.0，网上很多例子其实是针对1.0的
@@ -46,7 +48,7 @@ func TestMain(m *testing.M) {
 */
 
 func TestOrderRepo_AddOrder(t *testing.T) {
-	var order = &Order{Name: "order1", Price: 1.1}
+	var order = &model.Order{Name: "order1", Price: 1.1}
 	orderRepo := NewOrderRepo(DB)
 
 	mock.ExpectBegin()
@@ -59,17 +61,17 @@ func TestOrderRepo_AddOrder(t *testing.T) {
 }
 
 func TestOrderRepo_QueryOrders(t *testing.T) {
-	var orders = []Order{
+	var orders = []model.Order{
 		{1, "name1", 1.0},
 		{2, "name2", 1.0},
 	}
 	page, size := 2, 10
 	orderRepo := NewOrderRepo(DB)
-	condition := NewOrderFields(&Order{Price: 1.0}, []interface{}{"price"})
+	condition := &model.OrderFields{&model.Order{Price: 1.0}, []string{"price"}}
 
 	mock.ExpectQuery(
 		"SELECT * FROM `orders` WHERE `orders`.`price` = ? LIMIT 10 OFFSET 10").
-		WithArgs(condition.order.Price).
+		WithArgs(condition.Order.Price).
 		WillReturnRows(
 			sqlmock.NewRows([]string{"id", "name", "price"}).
 				AddRow(orders[0].Id, orders[0].Name, orders[0].Price).
@@ -83,14 +85,14 @@ func TestOrderRepo_QueryOrders(t *testing.T) {
 func TestOrderRepo_UpdateOrder(t *testing.T) {
 	orderRepo := NewOrderRepo(DB)
 	// 表示要更新的字段为Order对象中的id,name两个字段
-	updated := NewOrderFields(&Order{Id: 1, Name: "test_name"}, []interface{}{"id", "name"})
+	updated := &model.OrderFields{&model.Order{Id: 1, Name: "test_name"}, []string{"id", "name"}}
 	// 表示更新的条件为Order对象中的price字段
-	condition := NewOrderFields(&Order{Price: 1.0}, []interface{}{"price"})
+	condition := &model.OrderFields{&model.Order{Price: 1.0}, []string{"price"}}
 
 	mock.ExpectBegin()
 	mock.ExpectExec(
 		"UPDATE `orders` SET `id`=?,`name`=? WHERE `orders`.`price` = ?").
-		WithArgs(updated.order.Id, updated.order.Name, condition.order.Price).
+		WithArgs(updated.Order.Id, updated.Order.Name, condition.Order.Price).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 

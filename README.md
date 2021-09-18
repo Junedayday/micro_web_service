@@ -13,7 +13,7 @@
 ## 手工安装
 
 1. go语言版本 >=1.15
-2. [buf工具](https://github.com/bufbuild/buf/releases) >=0.41.0
+2. [buf工具](https://github.com/bufbuild/buf/releases) >=0.54.1
 3. grpc-gateway相关二进制文件的安装
 ```shell
 go install \
@@ -26,3 +26,10 @@ go install \
 > 保证上述安装的结果都放在了PATH目录下，可执行
 > 以上四个二进制程序的版本需要关注，尤其是带v2的
 > PS: 有同学会遇到一些很奇怪的问题，往往是因为存在多个二进制程序及版本
+
+## Docker镜像
+
+```bash
+docker pull mysql:5.7
+sudo docker run -p 3306:3306 --name mysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
+```

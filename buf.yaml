@@ -1,5 +1,10 @@
-version: v1beta1
-name: buf.build/demo-service/demo-project
+version: v1
 deps:
-  - buf.build/beta/googleapis
+  - buf.build/googleapis/googleapis
   - buf.build/grpc-ecosystem/grpc-gateway
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

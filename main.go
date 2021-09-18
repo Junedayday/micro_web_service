@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/Junedayday/micro_web_service/gen/idl/demo"
+	"github.com/Junedayday/micro_web_service/gen/idl/order"
 	"github.com/Junedayday/micro_web_service/internal/config"
 	"github.com/Junedayday/micro_web_service/internal/mysql"
 	"github.com/Junedayday/micro_web_service/internal/server"
@@ -29,6 +30,8 @@ func run() error {
 
 	if err := demo.RegisterDemoServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf(":%d", config.Viper.GetInt("server.grpc.port")), opts); err != nil {
 		return errors.Wrap(err, "RegisterDemoServiceHandlerFromEndpoint error")
+	} else if err := order.RegisterOrderServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf(":%d", config.Viper.GetInt("server.grpc.port")), opts); err != nil {
+		return errors.Wrap(err, "RegisterOrderServiceHandlerFromEndpoint error")
 	}
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
@@ -64,6 +67,7 @@ func main() {
 
 		s := grpc.NewServer()
 		demo.RegisterDemoServiceServer(s, &server.Server{})
+		order.RegisterOrderServiceServer(s, &server.Server{})
 
 		if err = s.Serve(lis); err != nil {
 			panic(err)
