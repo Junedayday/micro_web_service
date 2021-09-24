@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/Junedayday/micro_web_service/gen/idl/order"
-	"github.com/Junedayday/micro_web_service/internal/model"
+	"github.com/Junedayday/micro_web_service/internal/gormer"
 	"github.com/Junedayday/micro_web_service/internal/service"
 )
 
@@ -22,17 +22,17 @@ func (s *Server) ListOrders(ctx context.Context, req *order.ListOrdersRequest) (
 		resp.Orders[k] = &order.Order{
 			Id:    v.Id,
 			Name:  v.Name,
-			Price: v.Price,
+			Price: float32(v.Price),
 		}
 	}
 	return resp, nil
 }
 
 func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.Order, error) {
-	mOrder := &model.Order{
+	mOrder := &gormer.Order{
 		Id:    req.Order.Id,
 		Name:  req.Order.Name,
-		Price: req.Order.Price,
+		Price: float64(req.Order.Price),
 	}
 	err := service.NewOrderService().Create(ctx, mOrder)
 	if err != nil {
@@ -42,34 +42,32 @@ func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest)
 	return &order.Order{
 		Id:    mOrder.Id,
 		Name:  mOrder.Name,
-		Price: mOrder.Price,
+		Price: float32(mOrder.Price),
 	}, nil
 }
 
 func (s *Server) UpdateOrder(ctx context.Context, req *order.UpdateOrderRequest) (*emptypb.Empty, error) {
-	updated := &model.OrderFields{
-		Order: &model.Order{
-			Name:  req.Order.Name,
-			Price: req.Order.Price,
-		},
-		Fields: req.UpdateMask.Paths,
+	updateOrder := &gormer.Order{
+		Name:  req.Order.Name,
+		Price: float64(req.Order.Price),
 	}
-	condition := &model.OrderFields{
-		Order: &model.Order{
-			Id: req.Order.Id,
-		},
-		Fields: []string{"id"},
+	updated := gormer.NewOrderOptionsRawString(updateOrder, req.UpdateMask.Paths...)
+
+	condOrder := &gormer.Order{
+		Id: req.Order.Id,
 	}
+	condition := gormer.NewOrderOptions(condOrder, gormer.OrderFieldId)
 
 	err := service.NewOrderService().Update(ctx, updated, condition)
 	return &emptypb.Empty{}, err
 }
 
 func (s *Server) GetOrder(ctx context.Context, req *order.GetOrderRequest) (*order.Order, error) {
-	condition := &model.OrderFields{
-		Order:  &model.Order{Name: req.Name},
-		Fields: []string{"name"},
+	condOrder := &gormer.Order{
+		Name: req.Name,
 	}
+	condition := gormer.NewOrderOptions(condOrder, gormer.OrderFieldName)
+
 	orders, err := service.NewOrderService().List(ctx, 0, 1, condition)
 	if err != nil {
 		return nil, err
@@ -79,21 +77,19 @@ func (s *Server) GetOrder(ctx context.Context, req *order.GetOrderRequest) (*ord
 	return &order.Order{
 		Id:    orders[0].Id,
 		Name:  orders[0].Name,
-		Price: orders[0].Price,
+		Price: float32(orders[0].Price),
 	}, nil
 }
 
 func (s *Server) DeleteBook(ctx context.Context, req *order.DeleteBookRequest) (*emptypb.Empty, error) {
-	condition := &model.OrderFields{
-		Order:  &model.Order{Name: req.Name},
-		Fields: []string{"name"},
+	condOrder := &gormer.Order{
+		Name: req.Name,
 	}
+	condition := gormer.NewOrderOptions(condOrder, gormer.OrderFieldName)
 
 	// TODO soft delete
-	updated := &model.OrderFields{
-		Order:  &model.Order{},
-		Fields: []string{},
-	}
+	updateOrder := &gormer.Order{}
+	updated := gormer.NewOrderOptionsRawString(updateOrder)
 
 	return &emptypb.Empty{}, service.NewOrderService().Update(ctx, updated, condition)
 }

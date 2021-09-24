@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/Junedayday/micro_web_service/internal/dao"
+	"github.com/Junedayday/micro_web_service/internal/gormer"
 	"github.com/Junedayday/micro_web_service/internal/model"
 	"github.com/Junedayday/micro_web_service/internal/mysql"
 )
@@ -20,7 +21,7 @@ func NewOrderService() *OrderService {
 	}
 }
 
-func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int, condition *model.OrderFields) ([]model.Order, error) {
+func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) ([]gormer.Order, error) {
 	orders, err := orderSvc.orderRepo.QueryOrders(pageNumber, pageSize, condition)
 	if err != nil {
 		return nil, errors.Wrapf(err, "OrderService List pageNumber %d pageSize %d", pageNumber, pageSize)
@@ -28,7 +29,7 @@ func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int
 	return orders, nil
 }
 
-func (orderSvc *OrderService) Create(ctx context.Context, order *model.Order) error {
+func (orderSvc *OrderService) Create(ctx context.Context, order *gormer.Order) error {
 	err := orderSvc.orderRepo.AddOrder(order)
 	if err != nil {
 		return errors.Wrapf(err, "OrderService Create  order %+v", order)
@@ -36,7 +37,7 @@ func (orderSvc *OrderService) Create(ctx context.Context, order *model.Order) er
 	return nil
 }
 
-func (orderSvc *OrderService) Update(ctx context.Context, updated, condition *model.OrderFields) error {
+func (orderSvc *OrderService) Update(ctx context.Context, updated, condition *gormer.OrderOptions) error {
 	err := orderSvc.orderRepo.UpdateOrder(updated, condition)
 	if err != nil {
 		return errors.Wrapf(err, "OrderService Update updated %+v condition %+v", updated, condition)

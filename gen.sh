@@ -5,7 +5,7 @@
 # 需要更新或安装buf相关组件，使用 下面命令
 # buf mod update
 
-rm -rf gen/*
+rm -rf gen/idl/*
 buf generate
 
 # mock install guide: https://github.com/golang/mock

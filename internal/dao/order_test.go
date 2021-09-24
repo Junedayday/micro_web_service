@@ -10,7 +10,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/Junedayday/micro_web_service/internal/model"
+	"github.com/Junedayday/micro_web_service/internal/gormer"
 )
 
 // 注意，我们使用的是gorm 2.0，网上很多例子其实是针对1.0的
@@ -48,12 +48,12 @@ func TestMain(m *testing.M) {
 */
 
 func TestOrderRepo_AddOrder(t *testing.T) {
-	var order = &model.Order{Name: "order1", Price: 1.1}
+	var order = &gormer.Order{Name: "order1", Price: 1.1}
 	orderRepo := NewOrderRepo(DB)
 
 	mock.ExpectBegin()
-	mock.ExpectExec("INSERT INTO `orders` (`name`,`price`) VALUES (?,?)").
-		WithArgs(order.Name, order.Price).
+	mock.ExpectExec("INSERT INTO `orders` (`name`,`price`,`create_time`) VALUES (?,?,?)").
+		WithArgs(order.Name, order.Price, order.CreateTime).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	err := orderRepo.AddOrder(order)
@@ -61,13 +61,13 @@ func TestOrderRepo_AddOrder(t *testing.T) {
 }
 
 func TestOrderRepo_QueryOrders(t *testing.T) {
-	var orders = []model.Order{
-		{1, "name1", 1.0},
-		{2, "name2", 1.0},
+	var orders = []gormer.Order{
+		{Id: 1, Name: "name1", Price: 1.0},
+		{Id: 2, Name: "name2", Price: 1.0},
 	}
 	page, size := 2, 10
 	orderRepo := NewOrderRepo(DB)
-	condition := &model.OrderFields{&model.Order{Price: 1.0}, []string{"price"}}
+	condition := gormer.NewOrderOptions(&gormer.Order{Price: 1.0}, gormer.OrderFieldPrice)
 
 	mock.ExpectQuery(
 		"SELECT * FROM `orders` WHERE `orders`.`price` = ? LIMIT 10 OFFSET 10").
@@ -85,9 +85,9 @@ func TestOrderRepo_QueryOrders(t *testing.T) {
 func TestOrderRepo_UpdateOrder(t *testing.T) {
 	orderRepo := NewOrderRepo(DB)
 	// 表示要更新的字段为Order对象中的id,name两个字段
-	updated := &model.OrderFields{&model.Order{Id: 1, Name: "test_name"}, []string{"id", "name"}}
+	updated := gormer.NewOrderOptions(&gormer.Order{Id: 1, Name: "test_name"}, gormer.OrderFieldId, gormer.OrderFieldName)
 	// 表示更新的条件为Order对象中的price字段
-	condition := &model.OrderFields{&model.Order{Price: 1.0}, []string{"price"}}
+	condition := gormer.NewOrderOptions(&gormer.Order{Price: 1.0}, gormer.OrderFieldPrice)
 
 	mock.ExpectBegin()
 	mock.ExpectExec(
