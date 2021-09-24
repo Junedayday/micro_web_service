@@ -39,24 +39,25 @@ import (
 `
 )
 
-// go run main.go -dsn root:123456@tcp(127.0.0.1:3306)/demo
 func main() {
-	flag.StringVar(&dsn, "dsn", "root:123456@tcp(127.0.0.1:3306)/demo", "mysql 连接串")
-	flag.StringVar(&projectPath, "projectPath", "/Users/didi/Study/micro_web_service/", "项目在本机的目录")
-	flag.StringVar(&gormPath, "gormPath", "internal/gormer/", "生成的GORM结构体相对路径")
-	flag.StringVar(&daoPath, "daoPath", "internal/dao/", "生成的Dao层代码相对路径")
-	flag.StringVar(&goMod, "goMod", "github.com/Junedayday/micro_web_service", "包名")
-	flag.StringVar(&tableMatcher, "tableMatcher", "orders:order", "将table名称做一次映射，一般用于去掉复数")
+	flag.StringVar(&dsn, "dsn", "", "mysql 连接串")
+	flag.StringVar(&projectPath, "projectPath", "", "项目在本机的目录")
+	flag.StringVar(&gormPath, "gormPath", "", "生成的GORM结构体相对路径")
+	flag.StringVar(&daoPath, "daoPath", "", "生成的Dao层代码相对路径")
+	flag.StringVar(&goMod, "goMod", "", "包名")
+	flag.StringVar(&tableMatcher, "tableMatcher", "", "将table名称做一次映射，一般用于去掉复数")
 	flag.Parse()
 
 	// 创建文件夹（如果已存在会报错，不影响）
-	for _, path := range []string{gormPath, daoPath} {
+	for _, path := range []string{projectPath + gormPath, projectPath + daoPath} {
 		os.MkdirAll(path, os.ModePerm)
 	}
 
-	if len(dsn) == 0 {
+	if dsn == "" || projectPath == "" || gormPath == "" || daoPath == "" || goMod == "" {
+		fmt.Println("dsn,projectPath,gormPath,daoPath,goMod 为必填参数，请检查")
 		os.Exit(1)
 	}
+	fmt.Println(dsn, projectPath)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
