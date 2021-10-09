@@ -10,20 +10,24 @@ const OrderTableName = "orders"
 type OrderField string
 
 const (
-	OrderFieldId         OrderField = "id"
-	OrderFieldName       OrderField = "name"
-	OrderFieldPrice      OrderField = "price"
-	OrderFieldCreateTime OrderField = "create_time"
+	OrderFieldId           OrderField = "id"
+	OrderFieldName         OrderField = "name"
+	OrderFieldPrice        OrderField = "price"
+	OrderFieldCreateTime   OrderField = "create_time"
+	OrderFieldUpdateTime   OrderField = "update_time"
+	OrderFieldDeleteStatus OrderField = "delete_status"
 )
 
-var OrderFieldAll = []OrderField{"id", "name", "price", "create_time"}
+var OrderFieldAll = []OrderField{"id", "name", "price", "create_time", "update_time", "delete_status"}
 
 // Kernel struct for table for one row
 type Order struct {
-	Id         int64     `gorm:"column:id"`
-	Name       string    `gorm:"column:name"`
-	Price      float64   `gorm:"column:price"`
-	CreateTime time.Time `gorm:"column:create_time"`
+	Id           int64     `gorm:"column:id"`
+	Name         string    `gorm:"column:name"`
+	Price        float64   `gorm:"column:price"`
+	CreateTime   time.Time `gorm:"column:create_time"`
+	UpdateTime   time.Time `gorm:"column:update_time"`
+	DeleteStatus int       `gorm:"column:delete_status"`
 }
 
 // Kernel struct for table operation
@@ -33,11 +37,13 @@ type OrderOptions struct {
 }
 
 // Match: case insensitive
-var OrderFieldMap = map[string]string{
+var ordersFieldMap = map[string]string{
 	"Id": "id", "id": "id",
 	"Name": "name", "name": "name",
 	"Price": "price", "price": "price",
 	"CreateTime": "create_time", "create_time": "create_time",
+	"UpdateTime": "update_time", "update_time": "update_time",
+	"DeleteStatus": "delete_status", "delete_status": "delete_status",
 }
 
 func NewOrderOptions(target *Order, fields ...OrderField) *OrderOptions {
@@ -60,7 +66,7 @@ func NewOrderOptionsRawString(target *Order, fields ...string) *OrderOptions {
 		Order: target,
 	}
 	for _, field := range fields {
-		if f, ok := OrderFieldMap[field]; ok {
+		if f, ok := ordersFieldMap[field]; ok {
 			options.Fields = append(options.Fields, f)
 		}
 	}

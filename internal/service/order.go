@@ -21,12 +21,17 @@ func NewOrderService() *OrderService {
 	}
 }
 
-func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) ([]gormer.Order, error) {
+func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) ([]gormer.Order, int64, error) {
 	orders, err := orderSvc.orderRepo.QueryOrders(pageNumber, pageSize, condition)
 	if err != nil {
-		return nil, errors.Wrapf(err, "OrderService List pageNumber %d pageSize %d", pageNumber, pageSize)
+		return nil, 0, errors.Wrapf(err, "OrderService List pageNumber %d pageSize %d condition %+v", pageNumber, pageSize, condition)
 	}
-	return orders, nil
+	count, err := orderSvc.orderRepo.CountOrders(condition)
+	if err != nil {
+		return nil, 0, errors.Wrapf(err, "OrderService Count condition %+v", condition)
+	}
+
+	return orders, count, nil
 }
 
 func (orderSvc *OrderService) Create(ctx context.Context, order *gormer.Order) error {
@@ -41,6 +46,14 @@ func (orderSvc *OrderService) Update(ctx context.Context, updated, condition *go
 	err := orderSvc.orderRepo.UpdateOrder(updated, condition)
 	if err != nil {
 		return errors.Wrapf(err, "OrderService Update updated %+v condition %+v", updated, condition)
+	}
+	return nil
+}
+
+func (orderSvc *OrderService) Delete(ctx context.Context, condition *gormer.OrderOptions) error {
+	err := orderSvc.orderRepo.DeleteOrder(condition)
+	if err != nil {
+		return errors.Wrapf(err, "OrderService Delete condition %+v", condition)
 	}
 	return nil
 }

@@ -2,6 +2,8 @@
 package dao
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
@@ -15,24 +17,50 @@ type OrderRepo struct {
 func NewOrderRepo(db *gorm.DB) *OrderRepo {
 	return &OrderRepo{db: db}
 }
-
 func (repo *OrderRepo) AddOrder(order *gormer.Order) (err error) {
-	err = repo.db.Create(order).Error
+
+	if order.CreateTime.IsZero() {
+		order.CreateTime = time.Now()
+	}
+
+	if order.UpdateTime.IsZero() {
+		order.UpdateTime = time.Now()
+	}
+
+	err = repo.db.
+		Table(gormer.OrderTableName).
+		Create(order).
+		Error
 	return
 }
-
-func (repo *OrderRepo) QueryOrders(pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
+func (repo *OrderRepo) QueryOrders(pageNumber, pageSize int, condition *gormer.OrderOptions) (Orders []gormer.Order, err error) {
 	db := repo.db
 	if condition != nil {
 		db = db.Where(condition.Order, condition.Fields)
 	}
+
+	db = db.Where("delete_status != ?", 1)
+
 	err = db.
+		Table(gormer.OrderTableName).
 		Limit(pageSize).
 		Offset((pageNumber - 1) * pageSize).
-		Find(&orders).Error
+		Find(&Orders).Error
 	return
 }
+func (repo *OrderRepo) CountOrders(condition *gormer.OrderOptions) (count int64, err error) {
+	db := repo.db
+	if condition != nil {
+		db = db.Where(condition.Order, condition.Fields)
+	}
 
+	db = db.Where("delete_status != ?", 1)
+
+	err = db.
+		Table(gormer.OrderTableName).
+		Count(&count).Error
+	return
+}
 func (repo *OrderRepo) UpdateOrder(updated, condition *gormer.OrderOptions) (err error) {
 	if updated == nil || len(updated.Fields) == 0 {
 		return errors.New("update must choose certain fields")
@@ -40,11 +68,32 @@ func (repo *OrderRepo) UpdateOrder(updated, condition *gormer.OrderOptions) (err
 		return errors.New("update must include where condition")
 	}
 
+	if updated.Order.UpdateTime.IsZero() {
+		updated.Order.UpdateTime = time.Now()
+		updated.Fields = append(updated.Fields, "update_time")
+	}
+
 	err = repo.db.
-		Model(&gormer.Order{}).
+		Table(gormer.OrderTableName).
 		Where(condition.Order, condition.Fields).
 		Select(updated.Fields).
 		Updates(updated.Order).
+		Error
+	return
+}
+func (repo *OrderRepo) DeleteOrder(condition *gormer.OrderOptions) (err error) {
+	if condition == nil {
+		return errors.New("delete must include where condition")
+	}
+
+	err = repo.db.
+		Table(gormer.OrderTableName).
+		Where(condition.Order, condition.Fields).
+		Select("delete_status", "update_time").
+		Updates(&gormer.Order{
+			DeleteStatus: 1,
+			UpdateTime:   time.Now(),
+		}).
 		Error
 	return
 }

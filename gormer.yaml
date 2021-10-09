@@ -1,0 +1,15 @@
+database:
+  dsn: "root:123456@tcp(127.0.0.1:3306)/demo"
+  tables:
+    - name: "orders"
+      goStruct: "Order"
+      createTime: "create_time"
+      updateTime: "update_time"
+      softDeleteKey: "delete_status"
+      softDeleteValue: 1
+
+project:
+  base: "./"
+  gorm: "internal/gormer/"
+  dao: "internal/dao/"
+  go_mod: "github.com/Junedayday/micro_web_service"

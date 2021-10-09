@@ -10,15 +10,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
-)
-
-var (
-	dsn          string
-	projectPath  string
-	goMod        string
-	gormPath     string
-	daoPath      string
-	tableMatcher string
+	"github.com/spf13/viper"
 )
 
 const (
@@ -31,6 +23,8 @@ import "time"
 package %s
 
 import (
+	"time"
+	
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	
@@ -39,26 +33,41 @@ import (
 `
 )
 
+var Viper = viper.New()
+
 func main() {
-	flag.StringVar(&dsn, "dsn", "", "mysql 连接串")
-	flag.StringVar(&projectPath, "projectPath", "", "项目在本机的目录")
-	flag.StringVar(&gormPath, "gormPath", "", "生成的GORM结构体相对路径")
-	flag.StringVar(&daoPath, "daoPath", "", "生成的Dao层代码相对路径")
-	flag.StringVar(&goMod, "goMod", "", "包名")
-	flag.StringVar(&tableMatcher, "tableMatcher", "", "将table名称做一次映射，一般用于去掉复数")
+	var configFilePath = flag.String("c", "./", "config file path")
 	flag.Parse()
+
+	Viper.SetConfigName("gormer")        // config file name without file type
+	Viper.SetConfigType("yaml")          // config file type
+	Viper.AddConfigPath(*configFilePath) // config file path
+	if err := Viper.ReadInConfig(); err != nil {
+		panic(err)
+	} else if err = Viper.UnmarshalKey("database.tables", &tableInfo); err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v\n", tableInfo)
+
+	var (
+		dsn         = Viper.GetString("database.dsn")
+		projectPath = Viper.GetString("project.base")
+		goMod       = Viper.GetString("project.go_mod")
+		gormPath    = Viper.GetString("project.gorm")
+		daoPath     = Viper.GetString("project.dao")
+	)
+
+	if dsn == "" || projectPath == "" || gormPath == "" || daoPath == "" || goMod == "" {
+		fmt.Println("dsn,projectPath,gormPath,daoPath,goMod 为必填参数，请检查")
+		os.Exit(1)
+	}
 
 	// 创建文件夹（如果已存在会报错，不影响）
 	for _, path := range []string{projectPath + gormPath, projectPath + daoPath} {
 		os.MkdirAll(path, os.ModePerm)
 	}
 
-	if dsn == "" || projectPath == "" || gormPath == "" || daoPath == "" || goMod == "" {
-		fmt.Println("dsn,projectPath,gormPath,daoPath,goMod 为必填参数，请检查")
-		os.Exit(1)
-	}
-	fmt.Println(dsn, projectPath)
-
+	// 连接mysql
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
@@ -67,13 +76,14 @@ func main() {
 
 	fmt.Println("start to generate gorm structs")
 
+	// 读取数据库中的表
 	tables, err := getAllTables(db)
 	if err != nil {
 		fmt.Printf("getAllTables error %+v", err)
 		os.Exit(1)
 	}
 
-	tMatcher := getTableMatcher(tableMatcher, tables)
+	tMatcher := getTableMatcher()
 
 	for _, table := range tables {
 		// 1.生成结构
@@ -83,25 +93,25 @@ func main() {
 			os.Exit(1)
 		}
 
-		// 生成gormer file
+		// 2.生成gormer file
 		if gormPath[len(gormPath)-1] == '/' {
 			gormPath = gormPath[:len(gormPath)-1]
 		}
 		dirs := strings.Split(gormPath, "/")
 		header := fmt.Sprintf(gormerHeader, dirs[len(dirs)-1])
-		err = parseToFile(gormPath, tMatcher[table], header, structResult, parseToGormerTmpl)
+		err = parseToFile(projectPath+gormPath, tMatcher[table], header, structResult, parseToGormerTmpl)
 		if err != nil {
 			fmt.Printf("parseToFile error %+v\n", err)
 			os.Exit(1)
 		}
 
-		// 生成dao file
+		// 3.生成dao file
 		if daoPath[len(daoPath)-1] == '/' {
 			daoPath = daoPath[:len(daoPath)-1]
 		}
 		dirs = strings.Split(daoPath, "/")
 		header = fmt.Sprintf(daoHeader, dirs[len(dirs)-1], goMod, gormPath)
-		err = parseToFile(daoPath, tMatcher[table], header, structResult, parseToDaoTmpl)
+		err = parseToFile(projectPath+daoPath, tMatcher[table], header, structResult, parseToDaoTmpl)
 		if err != nil {
 			fmt.Printf("parseToFile error %+v\n", err)
 			os.Exit(1)
@@ -114,12 +124,12 @@ func main() {
 	exec.Command("go", "fmt", gormPath+"...").Run()
 }
 
-func parseToFile(filePath, name, fileHeader string, structResult StructLevel, parseFunc func(StructLevel) (string, error)) error {
+func parseToFile(filePath string, matchInfo TableInfo, fileHeader string, structResult StructLevel, parseFunc func(StructLevel) (string, error)) error {
 	result, err := parseFunc(structResult)
 	if err != nil {
-		return errors.Wrapf(err, "parseToDaoTmpl structResult %s", structResult)
+		return errors.Wrapf(err, "parseToDaoTmpl structResult %v", structResult)
 	}
-	path := fmt.Sprintf("%s%s/%s.go", projectPath, filePath, name)
+	path := fmt.Sprintf("%s/%s.go", filePath, matchInfo.GoStruct)
 	file, err := os.OpenFile(path, os.O_WRONLY+os.O_CREATE+os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return errors.Wrapf(err, "OpenFile path %s", path)

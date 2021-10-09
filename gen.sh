@@ -12,9 +12,5 @@ buf generate
 # mockgen -destination internal/mock/mock_order.go -package order -source=internal/model/order.go OrderRepository
 
 # gormer part
-gormer -dsn "root:123456@tcp(127.0.0.1:3306)/demo" \
--projectPath "./" \
--gormPath "internal/gormer/" \
--daoPath "internal/dao/" \
--goMod "github.com/Junedayday/micro_web_service" \
--tableMatcher "orders:order"
+# go get github.com/Junedayday/micro_web_service/pkg/gormer@latest
+gormer -c /Users/didi/Study/micro_web_service/

@@ -7,37 +7,37 @@ import (
 
 var gormerTmpl = `
 // Table Level Info
-const {{.Name}}TableName = "{{.TableName}}"
+const {{.StructName}}TableName = "{{.TableName}}"
 
 // Field Level Info
-type {{.Name}}Field string
+type {{.StructName}}Field string
 const (
 {{range $item := .Columns}}
-    {{$.Name}}Field{{$item.FieldName}} {{$.Name}}Field = "{{$item.GormName}}" {{end}}
+    {{$.StructName}}Field{{$item.FieldName}} {{$.StructName}}Field = "{{$item.GormName}}" {{end}}
 )
 
-var {{$.Name}}FieldAll = []{{$.Name}}Field{ {{range $k,$item := .Columns}}"{{$item.GormName}}", {{end}}}
+var {{$.StructName}}FieldAll = []{{$.StructName}}Field{ {{range $k,$item := .Columns}}"{{$item.GormName}}", {{end}}}
 
 // Kernel struct for table for one row
-type {{.Name}} struct { {{range $item := .Columns}}
+type {{.StructName}} struct { {{range $item := .Columns}}
 	{{$item.FieldName}}	{{$item.FieldType}}	` + "`" + `gorm:"column:{{$item.GormName}}"` + "`" + ` {{end}}
 }
 
 // Kernel struct for table operation
-type {{.Name}}Options struct {
-    {{.Name}} *{{.Name}}
+type {{.StructName}}Options struct {
+    {{.StructName}} *{{.StructName}}
     Fields []string
 }
 
 // Match: case insensitive
-var {{$.Name}}FieldMap = map[string]string{
+var {{$.TableName}}FieldMap = map[string]string{
 {{range $item := .Columns}}"{{$item.FieldName}}":"{{$item.GormName}}","{{$item.GormName}}":"{{$item.GormName}}",
 {{end}}
 }
 
-func New{{.Name}}Options(target *{{.Name}}, fields ...{{$.Name}}Field) *{{.Name}}Options{
-    options := &{{.Name}}Options{
-        {{.Name}}: target,
+func New{{.StructName}}Options(target *{{.StructName}}, fields ...{{$.StructName}}Field) *{{.StructName}}Options{
+    options := &{{.StructName}}Options{
+        {{.StructName}}: target,
         Fields: make([]string, len(fields)),
     }
     for index, field := range fields {
@@ -46,16 +46,16 @@ func New{{.Name}}Options(target *{{.Name}}, fields ...{{$.Name}}Field) *{{.Name}
     return options
 }
 
-func New{{.Name}}OptionsAll(target *{{.Name}}) *{{.Name}}Options{
-    return New{{.Name}}Options(target, {{$.Name}}FieldAll...)
+func New{{.StructName}}OptionsAll(target *{{.StructName}}) *{{.StructName}}Options{
+    return New{{.StructName}}Options(target, {{$.StructName}}FieldAll...)
 }
 
-func New{{.Name}}OptionsRawString(target *{{.Name}}, fields ...string) *{{.Name}}Options{
-    options := &{{.Name}}Options{
-        {{.Name}}: target,
+func New{{.StructName}}OptionsRawString(target *{{.StructName}}, fields ...string) *{{.StructName}}Options{
+    options := &{{.StructName}}Options{
+        {{.StructName}}: target,
     }
     for _, field := range fields {
-        if f,ok := {{$.Name}}FieldMap[field];ok {
+        if f,ok := {{$.TableName}}FieldMap[field];ok {
              options.Fields = append(options.Fields, f)
         }
     }
@@ -63,48 +63,113 @@ func New{{.Name}}OptionsRawString(target *{{.Name}}, fields ...string) *{{.Name}
 }
 `
 
-var daoTmpl = `
-type {{.Name}}Repo struct {
+var (
+	daoTmplRepo = `
+type {{.StructName}}Repo struct {
 	db *gorm.DB
 }
 
-func New{{.Name}}Repo(db *gorm.DB) *{{.Name}}Repo {
-	return &{{.Name}}Repo{db: db}
+func New{{.StructName}}Repo(db *gorm.DB) *{{.StructName}}Repo {
+	return &{{.StructName}}Repo{db: db}
 }
-
-func (repo *{{.Name}}Repo) Add{{.Name}}({{.SmallCamelName}} *gormer.{{.Name}}) (err error) {
-	err = repo.db.Create({{.SmallCamelName}}).Error
+`
+	daoTmplAdd = `func (repo *{{.StructName}}Repo) Add{{.StructName}}({{.StructSmallCamelName}} *gormer.{{.StructName}}) (err error) {
+{{if ne .FieldCreateTime "" }}
+    if {{.StructSmallCamelName}}.{{.FieldCreateTime}}.IsZero() {
+		{{.StructSmallCamelName}}.{{.FieldCreateTime}} = time.Now()
+	}
+{{end}}
+{{if ne .FieldUpdateTime "" }}
+    if {{.StructSmallCamelName}}.{{.FieldUpdateTime}}.IsZero() {
+		{{.StructSmallCamelName}}.{{.FieldUpdateTime}} = time.Now()
+	}
+{{end}}
+	err = repo.db.
+		Table(gormer.{{.StructName}}TableName).
+		Create({{.StructSmallCamelName}}).
+		Error
 	return
 }
-
-func (repo *{{.Name}}Repo) Query{{.Name}}s(pageNumber, pageSize int, condition *gormer.{{.Name}}Options) ({{.SmallCamelName}}s []gormer.{{.Name}}, err error) {
+`
+	daoTmplQuery = `func (repo *{{.StructName}}Repo) Query{{.StructName}}s(pageNumber, pageSize int, condition *gormer.{{.StructName}}Options) ({{.StructName}}s []gormer.{{.StructName}}, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.{{.Name}}, condition.Fields)
+		db = db.Where(condition.{{.StructName}}, condition.Fields)
 	}
+{{if ne .FieldSoftDeleteKey "" }}
+	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
+{{ end }}
 	err = db.
+		Table(gormer.{{.StructName}}TableName).
 		Limit(pageSize).
 		Offset((pageNumber - 1) * pageSize).
-		Find(&{{.SmallCamelName}}s).Error
+		Find(&{{.StructName}}s).Error
 	return
 }
-
-func (repo *{{.Name}}Repo) Update{{.Name}}(updated, condition *gormer.{{.Name}}Options) (err error) {
+`
+	daoTmplCount = `func (repo *{{.StructName}}Repo) Count{{.StructName}}s(condition *gormer.{{.StructName}}Options) (count int64, err error) {
+	db := repo.db
+	if condition != nil {
+		db = db.Where(condition.{{.StructName}}, condition.Fields)
+	}
+{{if ne .FieldSoftDeleteKey "" }}
+	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
+{{ end }}
+	err = db.
+		Table(gormer.{{.StructName}}TableName).
+		Count(&count).Error
+	return
+}
+`
+	daoTmplUpdate = `func (repo *{{.StructName}}Repo) Update{{.StructName}}(updated, condition *gormer.{{.StructName}}Options) (err error) {
 	if updated == nil || len(updated.Fields) == 0 {
 		return errors.New("update must choose certain fields")
 	} else if condition == nil {
 		return errors.New("update must include where condition")
 	}
-
+{{if ne .FieldUpdateTime "" }}
+    if updated.{{.StructName}}.{{.FieldUpdateTime}}.IsZero() {
+		updated.{{.StructName}}.{{.FieldUpdateTime}} = time.Now()
+		updated.Fields = append(updated.Fields, "{{.TableUpdateTime}}")
+	}
+{{end}}
 	err = repo.db.
-		Model(&gormer.{{.Name}}{}).
-		Where(condition.{{.Name}}, condition.Fields).
+		Table(gormer.{{.StructName}}TableName).
+		Where(condition.{{.StructName}}, condition.Fields).
 		Select(updated.Fields).
-		Updates(updated.{{.Name}}).
+		Updates(updated.{{.StructName}}).
 		Error
 	return
 }
 `
+	daoTmplDelete = `func (repo *{{.StructName}}Repo) Delete{{.StructName}}(condition *gormer.{{.StructName}}Options) (err error) {
+	if condition == nil {
+		return errors.New("delete must include where condition")
+	}
+
+	err = repo.db.
+        Table(gormer.{{.StructName}}TableName).
+		Where(condition.{{.StructName}}, condition.Fields).
+{{if eq .FieldSoftDeleteKey "" }} Delete(&gormer.{{.StructName}}{}).
+{{ else }}  {{if eq .FieldUpdateTime "" }}
+				Select("{{.TableSoftDeleteKey}}").
+				Updates(&gormer.{{.StructName}}{
+					{{.FieldSoftDeleteKey}}:{{.TableSoftDeleteValue}},
+				}).
+            {{ else }}
+                Select("{{.TableSoftDeleteKey}}","{{.TableUpdateTime}}").
+				Updates(&gormer.{{.StructName}}{
+					{{.FieldSoftDeleteKey}}:{{.TableSoftDeleteValue}},
+					{{.FieldUpdateTime}} : time.Now(),
+				}).
+            {{ end }}
+{{ end }}
+		Error
+	return
+}
+`
+	daoTmpl = daoTmplRepo + daoTmplAdd + daoTmplQuery + daoTmplCount + daoTmplUpdate + daoTmplDelete
+)
 
 func parseToGormerTmpl(structData StructLevel) (string, error) {
 	tmpl, err := template.New("t").Parse(gormerTmpl)

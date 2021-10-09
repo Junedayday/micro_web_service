@@ -33,10 +33,23 @@ var tableToGoStruct = map[string]string{
 }
 
 type StructLevel struct {
-	TableName      string
-	Name           string
-	SmallCamelName string
-	Columns        []FieldLevel
+	Columns []FieldLevel
+
+	TableName            string
+	StructName           string
+	StructSmallCamelName string
+
+	// create time
+	TableCreateTime string
+	FieldCreateTime string
+	// update time
+	TableUpdateTime string
+	FieldUpdateTime string
+
+	// soft delete
+	TableSoftDeleteKey   string
+	TableSoftDeleteValue int
+	FieldSoftDeleteKey   string
 }
 
 type FieldLevel struct {
@@ -65,13 +78,13 @@ func getAllTables(db *sql.DB) ([]string, error) {
 	return tables, nil
 }
 
-func Generate(db *sql.DB, table, structName string) (StructLevel, error) {
+func Generate(db *sql.DB, table string, matchInfo TableInfo) (StructLevel, error) {
 	var structData = StructLevel{
-		TableName: table,
-		Name:      camelCase(structName),
+		TableName:  table,
+		StructName: camelCase(matchInfo.GoStruct),
 	}
 
-	structData.SmallCamelName = string(unicode.ToLower(rune(structData.Name[0]))) + structData.Name[1:]
+	structData.StructSmallCamelName = string(unicode.ToLower(rune(structData.StructName[0]))) + structData.StructName[1:]
 
 	rows, err := db.Query(fmt.Sprintf(showCreateTableSQL, table))
 	if err != nil {
@@ -86,6 +99,21 @@ func Generate(db *sql.DB, table, structName string) (StructLevel, error) {
 			return structData, err
 		}
 		structData.Columns = parseTable(s)
+	}
+
+	for _, v := range structData.Columns {
+		switch v.GormName {
+		case matchInfo.CreateTime:
+			structData.TableCreateTime = matchInfo.CreateTime
+			structData.FieldCreateTime = v.FieldName
+		case matchInfo.UpdateTime:
+			structData.TableUpdateTime = matchInfo.UpdateTime
+			structData.FieldUpdateTime = v.FieldName
+		case matchInfo.SoftDeleteKey:
+			structData.TableSoftDeleteKey = matchInfo.SoftDeleteKey
+			structData.TableSoftDeleteValue = matchInfo.SoftDeleteValue
+			structData.FieldSoftDeleteKey = v.FieldName
+		}
 	}
 	return structData, nil
 }

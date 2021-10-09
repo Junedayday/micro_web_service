@@ -22,7 +22,7 @@ type OrderServiceClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*Order, error)
 	UpdateOrder(ctx context.Context, in *UpdateOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*Order, error)
-	DeleteBook(ctx context.Context, in *DeleteBookRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteBook(ctx context.Context, in *DeleteOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type orderServiceClient struct {
@@ -69,7 +69,7 @@ func (c *orderServiceClient) GetOrder(ctx context.Context, in *GetOrderRequest, 
 	return out, nil
 }
 
-func (c *orderServiceClient) DeleteBook(ctx context.Context, in *DeleteBookRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *orderServiceClient) DeleteBook(ctx context.Context, in *DeleteOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/order.OrderService/DeleteBook", in, out, opts...)
 	if err != nil {
@@ -86,7 +86,7 @@ type OrderServiceServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*Order, error)
 	UpdateOrder(context.Context, *UpdateOrderRequest) (*emptypb.Empty, error)
 	GetOrder(context.Context, *GetOrderRequest) (*Order, error)
-	DeleteBook(context.Context, *DeleteBookRequest) (*emptypb.Empty, error)
+	DeleteBook(context.Context, *DeleteOrderRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -106,7 +106,7 @@ func (UnimplementedOrderServiceServer) UpdateOrder(context.Context, *UpdateOrder
 func (UnimplementedOrderServiceServer) GetOrder(context.Context, *GetOrderRequest) (*Order, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) DeleteBook(context.Context, *DeleteBookRequest) (*emptypb.Empty, error) {
+func (UnimplementedOrderServiceServer) DeleteBook(context.Context, *DeleteOrderRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBook not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
@@ -195,7 +195,7 @@ func _OrderService_GetOrder_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _OrderService_DeleteBook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteBookRequest)
+	in := new(DeleteOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func _OrderService_DeleteBook_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/order.OrderService/DeleteBook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).DeleteBook(ctx, req.(*DeleteBookRequest))
+		return srv.(OrderServiceServer).DeleteBook(ctx, req.(*DeleteOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
