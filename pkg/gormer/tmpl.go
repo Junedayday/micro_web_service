@@ -20,7 +20,7 @@ var {{$.StructName}}FieldAll = []{{$.StructName}}Field{ {{range $k,$item := .Col
 
 // Kernel struct for table for one row
 type {{.StructName}} struct { {{range $item := .Columns}}
-	{{$item.FieldName}}	{{$item.FieldType}}	` + "`" + `gorm:"column:{{$item.GormName}}"` + "`" + ` {{end}}
+	{{$item.FieldName}}	{{$item.FieldType}}	` + "`" + `gorm:"column:{{$item.GormName}}"` + "`" + ` // {{$item.Comment}} {{end}}
 }
 
 // Kernel struct for table operation

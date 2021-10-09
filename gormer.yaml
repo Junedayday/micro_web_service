@@ -1,6 +1,15 @@
+# 数据库相关的信息
 database:
+  # 数据库连接
   dsn: "root:123456@tcp(127.0.0.1:3306)/demo"
+  # 所有要生成到Go结构体中的表
   tables:
+    # name-表名
+    # goStruct-Go中结构体名
+    # createTime-创建时间的数据库字段，必须为时间格式
+    # updateTime-更新时间的数据库字段，必须为时间格式
+    # softDeleteKey-软删除的数据库字段，必须为整数型，不填则为硬删除
+    # softDeleteValue-表示为软删除的对应值
     - name: "orders"
       goStruct: "Order"
       createTime: "create_time"
@@ -8,6 +17,7 @@ database:
       softDeleteKey: "delete_status"
       softDeleteValue: 1
 
+# 项目相关的信息
 project:
   base: "./"
   gorm: "internal/gormer/"

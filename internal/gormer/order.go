@@ -22,12 +22,12 @@ var OrderFieldAll = []OrderField{"id", "name", "price", "create_time", "update_t
 
 // Kernel struct for table for one row
 type Order struct {
-	Id           int64     `gorm:"column:id"`
-	Name         string    `gorm:"column:name"`
-	Price        float64   `gorm:"column:price"`
-	CreateTime   time.Time `gorm:"column:create_time"`
-	UpdateTime   time.Time `gorm:"column:update_time"`
-	DeleteStatus int       `gorm:"column:delete_status"`
+	Id           int64     `gorm:"column:id"`            // 主键
+	Name         string    `gorm:"column:name"`          // 名称，建议唯一
+	Price        float64   `gorm:"column:price"`         // 订单价格
+	CreateTime   time.Time `gorm:"column:create_time"`   // 创建时间
+	UpdateTime   time.Time `gorm:"column:update_time"`   // 更新时间
+	DeleteStatus int       `gorm:"column:delete_status"` // 删除状态，1表示软删除
 }
 
 // Kernel struct for table operation

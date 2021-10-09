@@ -13,6 +13,7 @@ import (
 const (
 	showTablesSQL      = "SHOW TABLES"
 	showCreateTableSQL = "SHOW CREATE TABLE %s"
+	commentMark        = "COMMENT"
 )
 
 var tableToGoStruct = map[string]string{
@@ -56,6 +57,7 @@ type FieldLevel struct {
 	FieldName string
 	FieldType string
 	GormName  string
+	Comment   string
 }
 
 func getAllTables(db *sql.DB) ([]string, error) {
@@ -127,10 +129,15 @@ func parseTable(s string) []FieldLevel {
 			p := strings.Split(line, " ")
 			name := strings.Trim(p[0], "`")
 			dataType := p[1]
+			comment := ""
+			if strings.ToUpper(p[len(p)-2]) == commentMark {
+				comment = strings.Trim(strings.Trim(p[len(p)-1], ","), "'")
+			}
 			columns = append(columns, FieldLevel{
 				FieldName: camelCase(name),
 				FieldType: fieldType(dataType),
 				GormName:  name,
+				Comment:   comment,
 			})
 		}
 	}
