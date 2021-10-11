@@ -34,15 +34,18 @@ var tableToGoStruct = map[string]string{
 }
 
 type StructLevel struct {
-	Columns []FieldLevel
-
+	// table -> struct
 	TableName            string
 	StructName           string
 	StructSmallCamelName string
 
+	// table column -> struct field
+	Columns []FieldLevel
+
 	// create time
 	TableCreateTime string
 	FieldCreateTime string
+
 	// update time
 	TableUpdateTime string
 	FieldUpdateTime string
@@ -56,8 +59,10 @@ type StructLevel struct {
 type FieldLevel struct {
 	FieldName string
 	FieldType string
-	GormName  string
-	Comment   string
+	// gorm tag for field
+	GormName string
+	// comment from create table sql
+	Comment string
 }
 
 func getAllTables(db *sql.DB) ([]string, error) {

@@ -19,7 +19,11 @@ database:
 
 # 项目相关的信息
 project:
+  # 项目的路径
   base: "./"
+  # gorm相关核心结构的代码路径
   gorm: "internal/gormer/"
+  # dao层CRUD核心结构的代码路径
   dao: "internal/dao/"
+  # 项目的go module信息
   go_mod: "github.com/Junedayday/micro_web_service"
