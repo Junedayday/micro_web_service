@@ -12,5 +12,5 @@ buf generate
 # mockgen -destination internal/mock/mock_order.go -package order -source=internal/model/order.go OrderRepository
 
 # gormer part
-# go get github.com/Junedayday/micro_web_service/pkg/gormer@latest
-gormer -c /Users/didi/Study/micro_web_service/
+go get github.com/Junedayday/micro_web_service/pkg/gormer
+gormer -c ./

@@ -1,7 +1,12 @@
 package zlog
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/natefinch/lumberjack"
+	"github.com/opentracing/opentracing-go"
+	"github.com/uber/jaeger-client-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -37,4 +42,20 @@ func Init(logPath string) {
 // 命名和原生的Zap Log尽量一致，方便理解
 func Sync() {
 	logger.Sync()
+}
+
+func WithTrace(ctx context.Context) *zap.SugaredLogger {
+	var jTraceId jaeger.TraceID
+	if parent := opentracing.SpanFromContext(ctx); parent != nil {
+		parentCtx := parent.Context()
+		if tracer := opentracing.GlobalTracer(); tracer != nil {
+			mySpan := tracer.StartSpan("my info", opentracing.ChildOf(parentCtx))
+			if sc, ok := mySpan.Context().(jaeger.SpanContext); ok {
+				jTraceId = sc.TraceID()
+			}
+			defer mySpan.Finish()
+		}
+	}
+
+	return Sugar.With(zap.String(jaeger.TraceContextHeaderName, fmt.Sprint(jTraceId)))
 }
