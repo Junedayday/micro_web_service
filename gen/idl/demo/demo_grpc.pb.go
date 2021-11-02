@@ -79,7 +79,7 @@ type UnsafeDemoServiceServer interface {
 	mustEmbedUnimplementedDemoServiceServer()
 }
 
-func RegisterDemoServiceServer(s *grpc.Server, srv DemoServiceServer) {
+func RegisterDemoServiceServer(s grpc.ServiceRegistrar, srv DemoServiceServer) {
 	s.RegisterService(&_DemoService_serviceDesc, srv)
 }
 

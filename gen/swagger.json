@@ -1,0 +1,347 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "idl/demo/demo.proto",
+    "version": "version not set"
+  },
+  "paths": {
+    "/apis/demo": {
+      "post": {
+        "security": [],
+        "tags": [
+          "DemoService"
+        ],
+        "summary": "Echo 样例接口",
+        "externalDocs": {
+          "description": "Find out more about the interface",
+          "url": "https://github.com/grpc-ecosystem/grpc-gateway"
+        },
+        "operationId": "DemoService_Echo",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/demoDemoRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/demoDemoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      }
+    },
+    "/apis/empty": {
+      "post": {
+        "tags": [
+          "DemoService"
+        ],
+        "summary": "Empty 空接口",
+        "operationId": "DemoService_Empty",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/demoEmptyMessage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/demoEmptyMessage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders": {
+      "get": {
+        "tags": [
+          "OrderService"
+        ],
+        "operationId": "OrderService_ListOrders",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int32",
+            "name": "pageNumber",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderListOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "OrderService"
+        ],
+        "operationId": "OrderService_CreateOrder",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/orderOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderOrder"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "OrderService"
+        ],
+        "operationId": "OrderService_UpdateOrder",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/orderUpdateOrderRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/{name=*}": {
+      "get": {
+        "tags": [
+          "OrderService"
+        ],
+        "operationId": "OrderService_GetOrder",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderOrder"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "OrderService"
+        ],
+        "operationId": "OrderService_DeleteBook",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "demoDemoRequest": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "demoDemoResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "demoEmptyMessage": {
+      "type": "object"
+    },
+    "orderListOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/orderOrder"
+          }
+        }
+      }
+    },
+    "orderOrder": {
+      "type": "object",
+      "properties": {
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "float"
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "orderUpdateOrderRequest": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/orderOrder"
+        },
+        "updateMask": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "DemoService"
+    },
+    {
+      "name": "OrderService"
+    }
+  ]
+}

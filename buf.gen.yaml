@@ -12,5 +12,5 @@ plugins:
     out: gen
     opt:
       - paths=source_relative
-#  - name: openapiv2
-#    out: gen/openapiv2
+  - name: openapiv2
+    out: gen/openapiv2
