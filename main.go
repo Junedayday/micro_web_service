@@ -15,6 +15,8 @@ import (
 	"github.com/uber/jaeger-client-go"
 	jaegerconfig "github.com/uber/jaeger-client-go/config"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/Junedayday/micro_web_service/gen/idl/demo"
 	"github.com/Junedayday/micro_web_service/gen/idl/order"
@@ -123,7 +125,14 @@ func main() {
 			panic(err)
 		}
 
-		s := grpc.NewServer(grpc.UnaryInterceptor(grpc_opentracing.UnaryServerInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer()))))
+		s := grpc.NewServer(
+			grpc.ChainUnaryInterceptor(
+				grpc_opentracing.UnaryServerInterceptor(
+					grpc_opentracing.WithTracer(opentracing.GlobalTracer()),
+				),
+				ServerValidationUnaryInterceptor,
+			),
+		)
 		demo.RegisterDemoServiceServer(s, &server.Server{})
 		order.RegisterOrderServiceServer(s, &server.Server{})
 
@@ -135,4 +144,19 @@ func main() {
 	if err := run(); err != nil {
 		panic(err)
 	}
+}
+
+// ValidateAll 对应 protoc-gen-validate 生成的 *.pb.validate.go 中的代码
+type Validator interface {
+	ValidateAll() error
+}
+
+func ServerValidationUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	if r, ok := req.(Validator); ok {
+		if err := r.ValidateAll(); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+
+	return handler(ctx, req)
 }

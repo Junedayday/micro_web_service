@@ -6,6 +6,8 @@
 # buf mod update
 
 rm -rf gen/idl/*
+cd idl && buf mod update && cd ..
+cd plugins && buf mod update && cd ..
 buf generate
 
 # mock install guide: https://github.com/golang/mock

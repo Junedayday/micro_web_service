@@ -22,6 +22,16 @@ go install \
     google.golang.org/protobuf/cmd/protoc-gen-go \
     google.golang.org/grpc/cmd/protoc-gen-go-grpc
 ```
+4. PGV插件
+参考https://github.com/envoyproxy/protoc-gen-validate#installation
+```shell
+# fetches this repo into $GOPATH
+go get -d github.com/envoyproxy/protoc-gen-validate
+
+# installs PGV into $GOPATH/bin
+make build
+```
+> 按官方文档方式安装不了，建议直接用`go get -u github.com/envoyproxy/protoc-gen-validate`
 
 > 保证上述安装的结果都放在了PATH目录下，可执行
 > 以上四个二进制程序的版本需要关注，尤其是带v2的

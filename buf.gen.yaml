@@ -12,5 +12,10 @@ plugins:
     out: gen
     opt:
       - paths=source_relative
+  - name: validate
+    out: gen
+    opt:
+      - paths=source_relative
+      - lang=go
   - name: openapiv2
     out: gen/openapiv2

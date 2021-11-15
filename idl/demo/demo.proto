@@ -7,21 +7,24 @@ import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
 message DemoRequest {
-   string value = 1;
+  string value = 1;
 }
 
 message DemoResponse {
-   int32 code = 1;
+  string value = 1;
 }
 
-message EmptyMessage {
+message EmptyRequest {
+}
+
+message EmptyResponse {
 }
 
 // 样例服务
 service DemoService {
 
-  // Echo 样例接口
-  rpc Echo(DemoRequest) returns (DemoResponse) {
+  // Demo 样例接口
+  rpc Demo(DemoRequest) returns (DemoResponse) {
     option (google.api.http) = {
       post : "/apis/demo"
       body : "*"
@@ -38,7 +41,7 @@ service DemoService {
   }
 
   // Empty 空接口
-  rpc Empty(EmptyMessage) returns (EmptyMessage) {
+  rpc Empty(EmptyRequest) returns (EmptyResponse) {
     option (google.api.http) = {
       post : "/apis/empty"
       body : "*"

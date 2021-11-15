@@ -7,11 +7,12 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
-import "protoc-gen-openapiv2/options/annotations.proto";
+// import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
 
 message ListOrdersRequest {
-  int32 page_number = 1;
-  int32 page_size = 2;
+  int32 page_number = 1 [(validate.rules).int32 = {gt: 0}];
+  int32 page_size = 2   [(validate.rules).int32 = {gt: 0}];
 }
 
 message ListOrdersResponse {
@@ -31,7 +32,15 @@ message GetOrderRequest {
   string name = 1;
 }
 
+message GetOrderResponse {
+  Order order = 1;
+}
+
 message CreateOrderRequest {
+  Order order = 1;
+}
+
+message CreateOrderResponse {
   Order order = 1;
 }
 
@@ -52,7 +61,7 @@ service OrderService {
     };
   }
 
-  rpc CreateOrder(CreateOrderRequest) returns (Order) {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
     option (google.api.http) = {
       post: "/v1/orders"
       body: "order"
@@ -66,13 +75,13 @@ service OrderService {
     };
   }
 
-  rpc GetOrder(GetOrderRequest) returns (Order) {
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {
     option (google.api.http) = {
       get: "/v1/orders/{name=*}"
     };
   }
 
-  rpc DeleteBook(DeleteOrderRequest) returns (google.protobuf.Empty) {
+  rpc DeleteOrder(DeleteOrderRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/orders/{name=*}"
     };

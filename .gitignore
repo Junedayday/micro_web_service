@@ -20,3 +20,5 @@ go.sum
 micro_web_service
 
 log/*
+
+.idea/

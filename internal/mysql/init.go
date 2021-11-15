@@ -1,10 +1,10 @@
 package mysql
 
 import (
-	"fmt"
+"fmt"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+"gorm.io/driver/mysql"
+"gorm.io/gorm"
 )
 
 var GormDB *gorm.DB
