@@ -33,10 +33,10 @@ func (repo *OrderRepo) AddOrder(ctx context.Context, order *gormer.Order) (err e
 		order.UpdateTime = time.Now()
 	}
 
-	repo.db.
+	repo.db.WithContext(ctx).
 		Table(gormer.OrderTableName).
 		Create(order)
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -48,12 +48,12 @@ func (repo *OrderRepo) QueryOrders(ctx context.Context, pageNumber, pageSize int
 
 	db = db.Where("delete_status != ?", 1)
 
-	db.
+	db.WithContext(ctx).
 		Table(gormer.OrderTableName).
 		Limit(pageSize).
 		Offset((pageNumber - 1) * pageSize).
 		Find(&orders)
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -65,10 +65,10 @@ func (repo *OrderRepo) CountOrders(ctx context.Context, condition *gormer.OrderO
 
 	db = db.Where("delete_status != ?", 1)
 
-	db.
+	db.WithContext(ctx).
 		Table(gormer.OrderTableName).
 		Count(&count)
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -84,12 +84,12 @@ func (repo *OrderRepo) UpdateOrder(ctx context.Context, updated, condition *gorm
 		updated.Fields = append(updated.Fields, "update_time")
 	}
 
-	repo.db.
+	repo.db.WithContext(ctx).
 		Table(gormer.OrderTableName).
 		Where(condition.Order, condition.Fields).
 		Select(updated.Fields).
 		Updates(updated.Order)
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -98,7 +98,7 @@ func (repo *OrderRepo) DeleteOrder(ctx context.Context, condition *gormer.OrderO
 		return errors.New("delete must include where condition")
 	}
 
-	repo.db.
+	repo.db.WithContext(ctx).
         Table(gormer.OrderTableName).
 		Where(condition.Order, condition.Fields).
   
@@ -109,7 +109,7 @@ func (repo *OrderRepo) DeleteOrder(ctx context.Context, condition *gormer.OrderO
 				})
             
 
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 

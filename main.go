@@ -111,10 +111,9 @@ func main() {
 	opentracing.SetGlobalTracer(tracer)
 
 	// mysql初始化失败的话，不要继续运行程序
-	if err := mysql.Init(config.Viper.GetString("mysql.user"),
+	if err := mysql.InitGorm(config.Viper.GetString("mysql.user"),
 		config.Viper.GetString("mysql.password"),
-		config.Viper.GetString("mysql.ip"),
-		config.Viper.GetInt("mysql.port"),
+		fmt.Sprintf("%s:%d",config.Viper.GetString("mysql.ip"), config.Viper.GetInt("mysql.port")),
 		config.Viper.GetString("mysql.dbname")); err != nil {
 		zlog.Sugar.Fatalf("init mysql error %v", err)
 	}
