@@ -17,12 +17,12 @@
         "tags": [
           "DemoService"
         ],
-        "summary": "Echo 样例接口",
+        "summary": "Demo 样例接口",
         "externalDocs": {
           "description": "Find out more about the interface",
           "url": "https://github.com/grpc-ecosystem/grpc-gateway"
         },
-        "operationId": "DemoService_Echo",
+        "operationId": "DemoService_Demo",
         "deprecated": true,
         "parameters": [
           {
@@ -63,7 +63,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/demoEmptyMessage"
+              "$ref": "#/definitions/demoEmptyRequest"
             }
           }
         ],
@@ -71,7 +71,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/demoEmptyMessage"
+              "$ref": "#/definitions/demoEmptyResponse"
             }
           },
           "default": {
@@ -137,7 +137,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orderOrder"
+              "$ref": "#/definitions/orderCreateOrderResponse"
             }
           },
           "default": {
@@ -195,7 +195,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orderOrder"
+              "$ref": "#/definitions/orderGetOrderResponse"
             }
           },
           "default": {
@@ -210,7 +210,7 @@
         "tags": [
           "OrderService"
         ],
-        "operationId": "OrderService_DeleteBook",
+        "operationId": "OrderService_DeleteOrder",
         "parameters": [
           {
             "type": "string",
@@ -246,14 +246,32 @@
     "demoDemoResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
+        "value": {
+          "type": "string"
         }
       }
     },
-    "demoEmptyMessage": {
+    "demoEmptyRequest": {
       "type": "object"
+    },
+    "demoEmptyResponse": {
+      "type": "object"
+    },
+    "orderCreateOrderResponse": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/orderOrder"
+        }
+      }
+    },
+    "orderGetOrderResponse": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/orderOrder"
+        }
+      }
     },
     "orderListOrdersResponse": {
       "type": "object",

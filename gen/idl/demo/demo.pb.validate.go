@@ -157,7 +157,7 @@ func (m *DemoResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Code
+	// no validation rules for Value
 
 	if len(errors) > 0 {
 		return DemoResponseMultiError(errors)
@@ -235,22 +235,22 @@ var _ interface {
 	ErrorName() string
 } = DemoResponseValidationError{}
 
-// Validate checks the field values on EmptyMessage with the rules defined in
+// Validate checks the field values on EmptyRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *EmptyMessage) Validate() error {
+func (m *EmptyRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on EmptyMessage with the rules defined
+// ValidateAll checks the field values on EmptyRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in EmptyMessageMultiError, or
+// result is a list of violation errors wrapped in EmptyRequestMultiError, or
 // nil if none found.
-func (m *EmptyMessage) ValidateAll() error {
+func (m *EmptyRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *EmptyMessage) validate(all bool) error {
+func (m *EmptyRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -258,17 +258,17 @@ func (m *EmptyMessage) validate(all bool) error {
 	var errors []error
 
 	if len(errors) > 0 {
-		return EmptyMessageMultiError(errors)
+		return EmptyRequestMultiError(errors)
 	}
 	return nil
 }
 
-// EmptyMessageMultiError is an error wrapping multiple validation errors
-// returned by EmptyMessage.ValidateAll() if the designated constraints aren't met.
-type EmptyMessageMultiError []error
+// EmptyRequestMultiError is an error wrapping multiple validation errors
+// returned by EmptyRequest.ValidateAll() if the designated constraints aren't met.
+type EmptyRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m EmptyMessageMultiError) Error() string {
+func (m EmptyRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -277,11 +277,11 @@ func (m EmptyMessageMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m EmptyMessageMultiError) AllErrors() []error { return m }
+func (m EmptyRequestMultiError) AllErrors() []error { return m }
 
-// EmptyMessageValidationError is the validation error returned by
-// EmptyMessage.Validate if the designated constraints aren't met.
-type EmptyMessageValidationError struct {
+// EmptyRequestValidationError is the validation error returned by
+// EmptyRequest.Validate if the designated constraints aren't met.
+type EmptyRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -289,22 +289,22 @@ type EmptyMessageValidationError struct {
 }
 
 // Field function returns field value.
-func (e EmptyMessageValidationError) Field() string { return e.field }
+func (e EmptyRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e EmptyMessageValidationError) Reason() string { return e.reason }
+func (e EmptyRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e EmptyMessageValidationError) Cause() error { return e.cause }
+func (e EmptyRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e EmptyMessageValidationError) Key() bool { return e.key }
+func (e EmptyRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e EmptyMessageValidationError) ErrorName() string { return "EmptyMessageValidationError" }
+func (e EmptyRequestValidationError) ErrorName() string { return "EmptyRequestValidationError" }
 
 // Error satisfies the builtin error interface
-func (e EmptyMessageValidationError) Error() string {
+func (e EmptyRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -316,14 +316,14 @@ func (e EmptyMessageValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sEmptyMessage.%s: %s%s",
+		"invalid %sEmptyRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = EmptyMessageValidationError{}
+var _ error = EmptyRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -331,4 +331,103 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = EmptyMessageValidationError{}
+} = EmptyRequestValidationError{}
+
+// Validate checks the field values on EmptyResponse with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *EmptyResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on EmptyResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in EmptyResponseMultiError, or
+// nil if none found.
+func (m *EmptyResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *EmptyResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return EmptyResponseMultiError(errors)
+	}
+	return nil
+}
+
+// EmptyResponseMultiError is an error wrapping multiple validation errors
+// returned by EmptyResponse.ValidateAll() if the designated constraints
+// aren't met.
+type EmptyResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m EmptyResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m EmptyResponseMultiError) AllErrors() []error { return m }
+
+// EmptyResponseValidationError is the validation error returned by
+// EmptyResponse.Validate if the designated constraints aren't met.
+type EmptyResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e EmptyResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e EmptyResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e EmptyResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e EmptyResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e EmptyResponseValidationError) ErrorName() string { return "EmptyResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e EmptyResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEmptyResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = EmptyResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = EmptyResponseValidationError{}

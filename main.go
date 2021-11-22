@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-
+	
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/opentracing/opentracing-go"
@@ -15,9 +15,9 @@ import (
 	"github.com/uber/jaeger-client-go"
 	jaegerconfig "github.com/uber/jaeger-client-go/config"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
+	`google.golang.org/grpc/codes`
+	`google.golang.org/grpc/status`
+	
 	"github.com/Junedayday/micro_web_service/gen/idl/demo"
 	"github.com/Junedayday/micro_web_service/gen/idl/order"
 	"github.com/Junedayday/micro_web_service/internal/config"
@@ -152,6 +152,7 @@ type Validator interface {
 }
 
 func ServerValidationUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	zlog.Sugar.Infof("%+v",req)
 	if r, ok := req.(Validator); ok {
 		if err := r.ValidateAll(); err != nil {
 			return nil, status.Error(codes.InvalidArgument, err.Error())

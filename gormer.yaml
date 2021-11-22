@@ -25,5 +25,13 @@ project:
   gorm: "internal/gormer/"
   # dao层CRUD核心结构的代码路径
   dao: "internal/dao/"
+  # model层的抽象代码
+  model: "internal/model/"
   # 项目的go module信息
   go_mod: "github.com/Junedayday/micro_web_service"
+
+  # Log 定制部分，一般用于自定义的log打印模式
+  log:
+    mode: false
+    # log package
+    package: "github.com/Junedayday/micro_web_service/internal/zlog"

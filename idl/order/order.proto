@@ -23,7 +23,7 @@ message ListOrdersResponse {
 message Order {
   int64 id = 1;
   string name = 2;
-  float price = 3;
+  float price = 3 [(validate.rules).float = {gt: 0}];
   google.protobuf.Timestamp create_time = 4;
   google.protobuf.Timestamp update_time = 5;
 }

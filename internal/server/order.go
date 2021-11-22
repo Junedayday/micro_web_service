@@ -2,11 +2,11 @@ package server
 
 import (
 	"context"
-
+	
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
+	
 	"github.com/Junedayday/micro_web_service/gen/idl/order"
 	"github.com/Junedayday/micro_web_service/internal/gormer"
 	"github.com/Junedayday/micro_web_service/internal/service"
@@ -32,7 +32,7 @@ func (s *Server) ListOrders(ctx context.Context, req *order.ListOrdersRequest) (
 	return resp, nil
 }
 
-func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.Order, error) {
+func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
 	mOrder := &gormer.Order{
 		Id:    req.Order.Id,
 		Name:  req.Order.Name,
@@ -42,14 +42,16 @@ func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest)
 	if err != nil {
 		return nil, err
 	}
-
-	return &order.Order{
-		Id:         mOrder.Id,
-		Name:       mOrder.Name,
-		Price:      float32(mOrder.Price),
-		CreateTime: timestamppb.New(mOrder.CreateTime),
-		UpdateTime: timestamppb.New(mOrder.UpdateTime),
-	}, nil
+	
+	return &order.CreateOrderResponse{
+		Order: &order.Order{
+			Id:         mOrder.Id,
+			Name:       mOrder.Name,
+			Price:      float32(mOrder.Price),
+			CreateTime: timestamppb.New(mOrder.CreateTime),
+			UpdateTime: timestamppb.New(mOrder.UpdateTime),
+		},
+	} , nil
 }
 
 func (s *Server) UpdateOrder(ctx context.Context, req *order.UpdateOrderRequest) (*emptypb.Empty, error) {
@@ -68,7 +70,7 @@ func (s *Server) UpdateOrder(ctx context.Context, req *order.UpdateOrderRequest)
 	return &emptypb.Empty{}, err
 }
 
-func (s *Server) GetOrder(ctx context.Context, req *order.GetOrderRequest) (*order.Order, error) {
+func (s *Server) GetOrder(ctx context.Context, req *order.GetOrderRequest) (*order.GetOrderResponse, error) {
 	condOrder := &gormer.Order{
 		Name: req.Name,
 	}
@@ -80,16 +82,18 @@ func (s *Server) GetOrder(ctx context.Context, req *order.GetOrderRequest) (*ord
 	} else if len(orders) == 0 {
 		return nil, errors.New("no order matched")
 	}
-	return &order.Order{
-		Id:         orders[0].Id,
-		Name:       orders[0].Name,
-		Price:      float32(orders[0].Price),
-		CreateTime: timestamppb.New(orders[0].CreateTime),
-		UpdateTime: timestamppb.New(orders[0].UpdateTime),
+	return &order.GetOrderResponse{
+		Order:&order.Order{
+			Id:         orders[0].Id,
+			Name:       orders[0].Name,
+			Price:      float32(orders[0].Price),
+			CreateTime: timestamppb.New(orders[0].CreateTime),
+			UpdateTime: timestamppb.New(orders[0].UpdateTime),
+		},
 	}, nil
 }
 
-func (s *Server) DeleteBook(ctx context.Context, req *order.DeleteOrderRequest) (*emptypb.Empty, error) {
+func (s *Server) DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest) (*emptypb.Empty, error) {
 	condOrder := &gormer.Order{
 		Name: req.Name,
 	}

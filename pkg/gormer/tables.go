@@ -54,6 +54,9 @@ type StructLevel struct {
 	TableSoftDeleteKey   string
 	TableSoftDeleteValue int
 	FieldSoftDeleteKey   string
+
+	// add log
+	LogOn bool
 }
 
 type FieldLevel struct {
