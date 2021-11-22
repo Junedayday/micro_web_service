@@ -15,7 +15,7 @@ import (
 	"%s/%s"
 )
 `
-	daoExtHeader = ` package %s
+	daoExtHeader = `package %s
 	
 // Implement ext method here
 `
@@ -45,10 +45,10 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 		{{.StructSmallCamelName}}.{{.FieldUpdateTime}} = time.Now()
 	}
 {{end}}
-	repo.db.
+	repo.db.WithContext(ctx).
 		Table(gormer.{{.StructName}}TableName).
 		Create({{.StructSmallCamelName}})
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -61,12 +61,12 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 {{if ne .FieldSoftDeleteKey "" }}
 	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
 {{ end }}
-	db.
+	db.WithContext(ctx).
 		Table(gormer.{{.StructName}}TableName).
 		Limit(pageSize).
 		Offset((pageNumber - 1) * pageSize).
 		Find(&{{.StructSmallCamelName}}s)
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -79,10 +79,10 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 {{if ne .FieldSoftDeleteKey "" }}
 	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
 {{ end }}
-	db.
+	db.WithContext(ctx).
 		Table(gormer.{{.StructName}}TableName).
 		Count(&count)
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -99,12 +99,12 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 		updated.Fields = append(updated.Fields, "{{.TableUpdateTime}}")
 	}
 {{end}}
-	repo.db.
+	repo.db.WithContext(ctx).
 		Table(gormer.{{.StructName}}TableName).
 		Where(condition.{{.StructName}}, condition.Fields).
 		Select(updated.Fields).
 		Updates(updated.{{.StructName}})
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 
@@ -114,7 +114,7 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 		return errors.New("delete must include where condition")
 	}
 
-	repo.db.
+	repo.db.WithContext(ctx).
         Table(gormer.{{.StructName}}TableName).
 		Where(condition.{{.StructName}}, condition.Fields).
 {{if eq .FieldSoftDeleteKey "" }} Delete(&gormer.{{.StructName}}{}).
@@ -131,7 +131,7 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 				})
             {{ end }}
 {{ end }}
-	err = getError(ctx, repo.db)
+	err = repo.db.Error
 	return
 }
 

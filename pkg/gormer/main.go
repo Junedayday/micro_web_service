@@ -38,7 +38,7 @@ func main() {
 		gormPath      = Viper.GetString("project.gorm")
 		daoPath       = Viper.GetString("project.dao")
 		modelPath     = Viper.GetString("project.model")
-		daoLogPackage = Viper.GetString("project.log.package")
+		// daoLogPackage = Viper.GetString("project.log.package")
 	)
 
 	if dsn == "" || projectPath == "" || gormPath == "" || daoPath == "" || modelPath == "" || goMod == "" {
@@ -157,17 +157,18 @@ func main() {
 		fmt.Printf("Generate Table %s Finished\n", table)
 	}
 
+	// deprecated
 	// 生成dao层统一的log
-	if daoPath[len(daoPath)-1] == '/' {
-		daoPath = daoPath[:len(daoPath)-1]
-	}
-	dirs := strings.Split(daoPath, "/")
-	header := fmt.Sprintf(daoBaseHeader, dirs[len(dirs)-1], daoLogPackage)
-	err = parseToFile(projectPath+daoPath, "gormer_base", header, StructLevel{LogOn: Viper.GetBool("project.log.mode")}, parseToTmpl, daoBaseTmpl)
-	if err != nil {
-		fmt.Printf("parseToFile error %+v\n", err)
-		os.Exit(1)
-	}
+	// if daoPath[len(daoPath)-1] == '/' {
+	// 	daoPath = daoPath[:len(daoPath)-1]
+	// }
+	// dirs := strings.Split(daoPath, "/")
+	// header := fmt.Sprintf(daoBaseHeader, dirs[len(dirs)-1], daoLogPackage)
+	// err = parseToFile(projectPath+daoPath, "gormer_base", header, StructLevel{LogOn: Viper.GetBool("project.log.mode")}, parseToTmpl, daoBaseTmpl)
+	// if err != nil {
+	// 	fmt.Printf("parseToFile error %+v\n", err)
+	// 	os.Exit(1)
+	// }
 
 	// go fmt files
 	exec.Command("go", "fmt", gormPath+"...").Run()
