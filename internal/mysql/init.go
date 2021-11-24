@@ -27,7 +27,7 @@ func InitGorm(user, password, addr string, dbname string) (err error) {
 	return
 }
 
-const callBackLogName = "zhikong_log"
+const callBackLogName = "zlog"
 
 func afterLog(db *gorm.DB) {
 	err := db.Error
