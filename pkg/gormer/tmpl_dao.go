@@ -117,7 +117,7 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 	repo.db.WithContext(ctx).
         Table(gormer.{{.StructName}}TableName).
 		Where(condition.{{.StructName}}, condition.Fields).
-{{if eq .FieldSoftDeleteKey "" }} Delete(&gormer.{{.StructName}}{}).
+{{if eq .FieldSoftDeleteKey "" }} Delete(&gormer.{{.StructName}}{})
 {{ else }}  {{if eq .FieldUpdateTime "" }}
 				Select("{{.TableSoftDeleteKey}}").
 				Updates(&gormer.{{.StructName}}{
