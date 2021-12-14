@@ -1,7 +1,7 @@
 package dao
 
 import (
-	`context`
+	"context"
 	"database/sql"
 	"os"
 	"testing"
@@ -63,7 +63,7 @@ func TestOrderRepo_AddOrder(t *testing.T) {
 		WithArgs(order.Name, order.Price, order.CreateTime, order.UpdateTime, orderSoftNotDeleted).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
-	err := orderRepo.AddOrder(context.Background(),order)
+	err := orderRepo.AddOrder(context.Background(), order)
 	assert.Nil(t, err)
 }
 
@@ -84,7 +84,7 @@ func TestOrderRepo_QueryOrders(t *testing.T) {
 				AddRow(orders[0].Id, orders[0].Name, orders[0].Price, orderSoftNotDeleted).
 				AddRow(orders[1].Id, orders[1].Name, orders[1].Price, orderSoftNotDeleted))
 
-	ret, err := orderRepo.QueryOrders(context.Background(),page, size, condition)
+	ret, err := orderRepo.QueryOrders(context.Background(), page, size, condition)
 	assert.Nil(t, err)
 	assert.Equal(t, orders, ret)
 }
@@ -104,7 +104,7 @@ func TestOrderRepo_CountOrders(t *testing.T) {
 			sqlmock.NewRows([]string{"count(*)"}).
 				AddRow(len(orders)))
 
-	ret, err := orderRepo.CountOrders(context.Background(),condition)
+	ret, err := orderRepo.CountOrders(context.Background(), condition)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, int(ret))
 }
@@ -123,7 +123,7 @@ func TestOrderRepo_UpdateOrder(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
-	err := orderRepo.UpdateOrder(context.Background(),updated, condition)
+	err := orderRepo.UpdateOrder(context.Background(), updated, condition)
 	assert.Nil(t, err)
 }
 
@@ -139,6 +139,6 @@ func TestOrderRepo_DeleteOrder(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
-	orderRepo.DeleteOrder(context.Background(),condition)
+	orderRepo.DeleteOrder(context.Background(), condition)
 	// 这里update_time的时间会不一致，因为DeleteOrder方法中取的是最新时间
 }

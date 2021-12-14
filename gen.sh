@@ -6,8 +6,7 @@
 # buf mod update
 
 rm -rf gen/idl/*
-cd idl && buf mod update && cd ..
-cd plugins && buf mod update && cd ..
+buf mod update
 buf generate
 
 # mock install guide: https://github.com/golang/mock
@@ -16,3 +15,7 @@ buf generate
 # gormer part
 go get github.com/Junedayday/micro_web_service/pkg/gormer
 gormer -c ./
+
+./format.sh
+
+./swagger.sh

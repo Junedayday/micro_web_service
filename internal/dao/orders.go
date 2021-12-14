@@ -4,10 +4,10 @@ package dao
 import (
 	"context"
 	"time"
-	
+
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	
+
 	"github.com/Junedayday/micro_web_service/internal/gormer"
 	"github.com/Junedayday/micro_web_service/internal/model"
 )
@@ -24,12 +24,11 @@ var _ model.OrderModel = NewOrderRepo(nil)
 
 func (repo *OrderRepo) AddOrder(ctx context.Context, order *gormer.Order) (err error) {
 
-    if order.CreateTime.IsZero() {
+	if order.CreateTime.IsZero() {
 		order.CreateTime = time.Now()
 	}
 
-
-    if order.UpdateTime.IsZero() {
+	if order.UpdateTime.IsZero() {
 		order.UpdateTime = time.Now()
 	}
 
@@ -79,7 +78,7 @@ func (repo *OrderRepo) UpdateOrder(ctx context.Context, updated, condition *gorm
 		return errors.New("update must include where condition")
 	}
 
-    if updated.Order.UpdateTime.IsZero() {
+	if updated.Order.UpdateTime.IsZero() {
 		updated.Order.UpdateTime = time.Now()
 		updated.Fields = append(updated.Fields, "update_time")
 	}
@@ -99,17 +98,14 @@ func (repo *OrderRepo) DeleteOrder(ctx context.Context, condition *gormer.OrderO
 	}
 
 	repo.db.WithContext(ctx).
-        Table(gormer.OrderTableName).
+		Table(gormer.OrderTableName).
 		Where(condition.Order, condition.Fields).
-  
-                Select("delete_status","update_time").
-				Updates(&gormer.Order{
-					DeleteStatus:1,
-					UpdateTime : time.Now(),
-				})
-            
+		Select("delete_status", "update_time").
+		Updates(&gormer.Order{
+			DeleteStatus: 1,
+			UpdateTime:   time.Now(),
+		})
 
 	err = repo.db.Error
 	return
 }
-

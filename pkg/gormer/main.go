@@ -32,12 +32,12 @@ func main() {
 	fmt.Printf("%+v\n", tableInfo)
 
 	var (
-		dsn           = Viper.GetString("database.dsn")
-		projectPath   = Viper.GetString("project.base")
-		goMod         = Viper.GetString("project.go_mod")
-		gormPath      = Viper.GetString("project.gorm")
-		daoPath       = Viper.GetString("project.dao")
-		modelPath     = Viper.GetString("project.model")
+		dsn         = Viper.GetString("database.dsn")
+		projectPath = Viper.GetString("project.base")
+		goMod       = Viper.GetString("project.go_mod")
+		gormPath    = Viper.GetString("project.gorm")
+		daoPath     = Viper.GetString("project.dao")
+		modelPath   = Viper.GetString("project.model")
 		// daoLogPackage = Viper.GetString("project.log.package")
 	)
 

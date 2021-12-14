@@ -2,17 +2,19 @@ package server
 
 import (
 	"context"
-	
+
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	
+
 	"github.com/Junedayday/micro_web_service/gen/idl/order"
 	"github.com/Junedayday/micro_web_service/internal/gormer"
+	"github.com/Junedayday/micro_web_service/internal/metrics"
 	"github.com/Junedayday/micro_web_service/internal/service"
 )
 
 func (s *Server) ListOrders(ctx context.Context, req *order.ListOrdersRequest) (*order.ListOrdersResponse, error) {
+	metrics.OrderList.With(map[string]string{"service": "example"}).Inc()
 	orders, count, err := service.NewOrderService().List(ctx, int(req.PageNumber), int(req.PageSize), nil)
 	if err != nil {
 		return nil, err
@@ -42,7 +44,7 @@ func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &order.CreateOrderResponse{
 		Order: &order.Order{
 			Id:         mOrder.Id,
@@ -51,7 +53,7 @@ func (s *Server) CreateOrder(ctx context.Context, req *order.CreateOrderRequest)
 			CreateTime: timestamppb.New(mOrder.CreateTime),
 			UpdateTime: timestamppb.New(mOrder.UpdateTime),
 		},
-	} , nil
+	}, nil
 }
 
 func (s *Server) UpdateOrder(ctx context.Context, req *order.UpdateOrderRequest) (*emptypb.Empty, error) {
@@ -83,7 +85,7 @@ func (s *Server) GetOrder(ctx context.Context, req *order.GetOrderRequest) (*ord
 		return nil, errors.New("no order matched")
 	}
 	return &order.GetOrderResponse{
-		Order:&order.Order{
+		Order: &order.Order{
 			Id:         orders[0].Id,
 			Name:       orders[0].Name,
 			Price:      float32(orders[0].Price),

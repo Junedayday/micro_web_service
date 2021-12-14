@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) Demo(ctx context.Context, req *demo.DemoRequest) (*demo.DemoResponse, error) {
-	return &demo.DemoResponse{ }, nil
+	return &demo.DemoResponse{}, nil
 }
 
 func (s *Server) Empty(ctx context.Context, req *demo.EmptyRequest) (*demo.EmptyResponse, error) {

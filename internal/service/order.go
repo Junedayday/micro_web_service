@@ -25,11 +25,11 @@ func NewOrderService() *OrderService {
 func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) ([]gormer.Order, int64, error) {
 	zlog.WithTrace(ctx).Infof("page number is %d", pageNumber)
 
-	orders, err := orderSvc.orderRepo.QueryOrders(ctx,pageNumber, pageSize, condition)
+	orders, err := orderSvc.orderRepo.QueryOrders(ctx, pageNumber, pageSize, condition)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "OrderService List pageNumber %d pageSize %d condition %+v", pageNumber, pageSize, condition)
 	}
-	count, err := orderSvc.orderRepo.CountOrders(ctx,condition)
+	count, err := orderSvc.orderRepo.CountOrders(ctx, condition)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "OrderService Count condition %+v", condition)
 	}
@@ -38,7 +38,7 @@ func (orderSvc *OrderService) List(ctx context.Context, pageNumber, pageSize int
 }
 
 func (orderSvc *OrderService) Create(ctx context.Context, order *gormer.Order) error {
-	err := orderSvc.orderRepo.AddOrder(ctx,order)
+	err := orderSvc.orderRepo.AddOrder(ctx, order)
 	if err != nil {
 		return errors.Wrapf(err, "OrderService Create  order %+v", order)
 	}
@@ -46,7 +46,7 @@ func (orderSvc *OrderService) Create(ctx context.Context, order *gormer.Order) e
 }
 
 func (orderSvc *OrderService) Update(ctx context.Context, updated, condition *gormer.OrderOptions) error {
-	err := orderSvc.orderRepo.UpdateOrder(ctx,updated, condition)
+	err := orderSvc.orderRepo.UpdateOrder(ctx, updated, condition)
 	if err != nil {
 		return errors.Wrapf(err, "OrderService Update updated %+v condition %+v", updated, condition)
 	}
@@ -54,7 +54,7 @@ func (orderSvc *OrderService) Update(ctx context.Context, updated, condition *go
 }
 
 func (orderSvc *OrderService) Delete(ctx context.Context, condition *gormer.OrderOptions) error {
-	err := orderSvc.orderRepo.DeleteOrder(ctx,condition)
+	err := orderSvc.orderRepo.DeleteOrder(ctx, condition)
 	if err != nil {
 		return errors.Wrapf(err, "OrderService Delete condition %+v", condition)
 	}

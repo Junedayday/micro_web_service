@@ -3,6 +3,8 @@ server:
     port: 8081
   grpc:
     port: 8082
+  prometheus:
+    port: 8083
 
 zlog:
   path: "log/service.log"

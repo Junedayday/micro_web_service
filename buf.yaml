@@ -1,8 +1,8 @@
 version: v1
 deps:
-  - buf.build/googleapis/googleapis
-  - buf.build/grpc-ecosystem/grpc-gateway
-  - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/grpc-ecosystem/grpc-gateway:ff83506eb9cc4cf8972f49ce87e6ed3e
+  - buf.build/googleapis/googleapis:1d9ede4af1a7473a917aa31c83184e23
+  - buf.build/envoyproxy/protoc-gen-validate:bb405eae115246f0b5ccf8997136e3d8
 lint:
   use:
     - DEFAULT

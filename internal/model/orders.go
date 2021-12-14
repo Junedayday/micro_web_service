@@ -3,7 +3,7 @@ package model
 
 import (
 	"context"
-	
+
 	"github.com/Junedayday/micro_web_service/internal/gormer"
 )
 
@@ -13,7 +13,7 @@ type OrderModel interface {
 	CountOrders(ctx context.Context, condition *gormer.OrderOptions) (count int64, err error)
 	UpdateOrder(ctx context.Context, updated, condition *gormer.OrderOptions) (err error)
 	DeleteOrder(ctx context.Context, condition *gormer.OrderOptions) (err error)
-	
+
 	// Implement Your Method in ext model
 	OrderExtModel
 }

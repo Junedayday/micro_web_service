@@ -6,18 +6,19 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	
+
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/uber/jaeger-client-go"
 	jaegerconfig "github.com/uber/jaeger-client-go/config"
 	"google.golang.org/grpc"
-	`google.golang.org/grpc/codes`
-	`google.golang.org/grpc/status`
-	
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/Junedayday/micro_web_service/gen/idl/demo"
 	"github.com/Junedayday/micro_web_service/gen/idl/order"
 	"github.com/Junedayday/micro_web_service/internal/config"
@@ -92,6 +93,12 @@ func main() {
 	defer zlog.Sync()
 	zlog.Sugar.Info("server is running")
 
+	go func() {
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", config.Viper.GetInt("server.prometheus.port")), mux)
+	}()
+
 	traceCfg := &jaegerconfig.Configuration{
 		ServiceName: "MyService",
 		Sampler: &jaegerconfig.SamplerConfig{
@@ -113,7 +120,7 @@ func main() {
 	// mysql初始化失败的话，不要继续运行程序
 	if err := mysql.InitGorm(config.Viper.GetString("mysql.user"),
 		config.Viper.GetString("mysql.password"),
-		fmt.Sprintf("%s:%d",config.Viper.GetString("mysql.ip"), config.Viper.GetInt("mysql.port")),
+		fmt.Sprintf("%s:%d", config.Viper.GetString("mysql.ip"), config.Viper.GetInt("mysql.port")),
 		config.Viper.GetString("mysql.dbname")); err != nil {
 		zlog.Sugar.Fatalf("init mysql error %v", err)
 	}
@@ -151,7 +158,7 @@ type Validator interface {
 }
 
 func ServerValidationUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	zlog.Sugar.Infof("%+v",req)
+	zlog.Sugar.Infof("%+v", req)
 	if r, ok := req.(Validator); ok {
 		if err := r.ValidateAll(); err != nil {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
