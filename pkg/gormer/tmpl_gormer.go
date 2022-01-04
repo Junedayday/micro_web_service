@@ -10,25 +10,29 @@ import "time"
 
 var gormerTmpl = `
 // Table Level Info
-const {{.StructName}}TableName = "{{.TableName}}"
+const {{.StructName.UpperS}}TableName = "{{.TableName}}"
 
 // Field Level Info
-type {{.StructName}}Field string
+type {{.StructName.UpperS}}Field string
 const (
 {{range $item := .Columns}}
-    {{$.StructName}}Field{{$item.FieldName}} {{$.StructName}}Field = "{{$item.GormName}}" {{end}}
+    {{$.StructName.UpperS}}Field{{$item.FieldName}} {{$.StructName.UpperS}}Field = "{{$item.GormName}}" {{end}}
 )
 
-var {{$.StructName}}FieldAll = []{{$.StructName}}Field{ {{range $k,$item := .Columns}}"{{$item.GormName}}", {{end}}}
+{{if ne .FieldSoftDeleteKey "" }}
+const {{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted = {{.TableSoftDeleteValue}}
+{{ end }}
+
+var {{$.StructName.UpperS}}FieldAll = []{{$.StructName.UpperS}}Field{ {{range $k,$item := .Columns}}"{{$item.GormName}}", {{end}}}
 
 // Kernel struct for table for one row
-type {{.StructName}} struct { {{range $item := .Columns}}
+type {{.StructName.UpperS}} struct { {{range $item := .Columns}}
 	{{$item.FieldName}}	{{$item.FieldType}}	` + "`" + `gorm:"column:{{$item.GormName}}"` + "`" + ` // {{$item.Comment}} {{end}}
 }
 
 // Kernel struct for table operation
-type {{.StructName}}Options struct {
-    {{.StructName}} *{{.StructName}}
+type {{.StructName.UpperS}}Options struct {
+    {{.StructName.UpperS}} *{{.StructName.UpperS}}
     Fields []string
 }
 
@@ -38,9 +42,9 @@ var {{$.TableName}}FieldMap = map[string]string{
 {{end}}
 }
 
-func New{{.StructName}}Options(target *{{.StructName}}, fields ...{{$.StructName}}Field) *{{.StructName}}Options{
-    options := &{{.StructName}}Options{
-        {{.StructName}}: target,
+func New{{.StructName.UpperS}}Options(target *{{.StructName.UpperS}}, fields ...{{$.StructName.UpperS}}Field) *{{.StructName.UpperS}}Options{
+    options := &{{.StructName.UpperS}}Options{
+        {{.StructName.UpperS}}: target,
         Fields: make([]string, len(fields)),
     }
     for index, field := range fields {
@@ -49,13 +53,13 @@ func New{{.StructName}}Options(target *{{.StructName}}, fields ...{{$.StructName
     return options
 }
 
-func New{{.StructName}}OptionsAll(target *{{.StructName}}) *{{.StructName}}Options{
-    return New{{.StructName}}Options(target, {{$.StructName}}FieldAll...)
+func New{{.StructName.UpperS}}OptionsAll(target *{{.StructName.UpperS}}) *{{.StructName.UpperS}}Options{
+    return New{{.StructName.UpperS}}Options(target, {{$.StructName.UpperS}}FieldAll...)
 }
 
-func New{{.StructName}}OptionsRawString(target *{{.StructName}}, fields ...string) *{{.StructName}}Options{
-    options := &{{.StructName}}Options{
-        {{.StructName}}: target,
+func New{{.StructName.UpperS}}OptionsRawString(target *{{.StructName.UpperS}}, fields ...string) *{{.StructName.UpperS}}Options{
+    options := &{{.StructName.UpperS}}Options{
+        {{.StructName.UpperS}}: target,
     }
     for _, field := range fields {
         if f,ok := {{$.TableName}}FieldMap[field];ok {

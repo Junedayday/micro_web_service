@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"html/template"
 	"os"
 	"os/exec"
 	"strings"
+	"text/template"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
@@ -128,7 +128,6 @@ func main() {
 		}
 
 		// 4-1.生成model file
-
 		dirs = strings.Split(modelPath, "/")
 		header = fmt.Sprintf(modelHeader, dirs[len(dirs)-1], goMod, gormPath)
 		err = parseToFile(projectPath+modelPath, tMatcher[table].Name, header, structResult, parseToTmpl, modelTmpl)
@@ -146,7 +145,7 @@ func main() {
 				os.Exit(1)
 			}
 
-			_, err = file.WriteString(fmt.Sprintf(modelExtHeader, dirs[len(dirs)-1]) + fmt.Sprintf(modelExtTmpl, structResult.StructName))
+			_, err = file.WriteString(fmt.Sprintf(modelExtHeader, dirs[len(dirs)-1]) + fmt.Sprintf(modelExtTmpl, structResult.StructName.UpperP))
 			if err != nil {
 				file.Close()
 				fmt.Printf("WriteString error %+v\n", err)
@@ -170,8 +169,6 @@ func main() {
 	// 	os.Exit(1)
 	// }
 
-	// go fmt files
-	exec.Command("go", "fmt", gormPath+"...").Run()
 }
 
 func parseToFile(filePath string, fileName string, fileHeader string, structResult StructLevel, parseFunc func(StructLevel, string) (string, error), text string) error {
@@ -190,15 +187,28 @@ func parseToFile(filePath string, fileName string, fileHeader string, structResu
 	if err != nil {
 		return errors.Wrap(err, "WriteString to file")
 	}
+
+	// go fmt files
+	exec.Command("go", "fmt", path).Run()
 	return nil
 }
 
 func parseToTmpl(structData StructLevel, text string) (string, error) {
-	tmpl, err := template.New("t").Parse(text)
+	tmpl, err := template.New("t").Funcs(template.FuncMap{"counter": counter}).Parse(text)
+	// tmpl, err := template.New("t").Parse(text)
 	if err != nil {
 		return "", err
 	}
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, structData)
 	return buf.String(), nil
+}
+
+// counter 是为了去除一个数组最后一个分隔符的问题，如 1,2,3 不填最后的逗号
+func counter() func() int {
+	i := -1
+	return func() int {
+		i++
+		return i
+	}
 }

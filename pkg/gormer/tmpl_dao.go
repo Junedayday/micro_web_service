@@ -23,110 +23,133 @@ import (
 
 var (
 	daoTmplRepo = `
-type {{.StructName}}Repo struct {
+type {{.StructName.UpperS}}Repo struct {
 	db *gorm.DB
 }
 
-func New{{.StructName}}Repo(db *gorm.DB) *{{.StructName}}Repo {
-	return &{{.StructName}}Repo{db: db}
+func New{{.StructName.UpperS}}Repo(db *gorm.DB) *{{.StructName.UpperS}}Repo {
+	return &{{.StructName.UpperS}}Repo{db: db}
 }
 
-var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
+var _ model.{{.StructName.UpperS}}Model = New{{.StructName.UpperS}}Repo(nil)
 
 `
-	daoTmplAdd = `func (repo *{{.StructName}}Repo) Add{{.StructName}}(ctx context.Context, {{.StructSmallCamelName}} *gormer.{{.StructName}}) (err error) {
+	daoTmplAdd = `
+func (repo *{{.StructName.UpperS}}Repo) Add{{.StructName.UpperS}}(ctx context.Context, {{.StructName.LowerS}} *gormer.{{.StructName.UpperS}}) (err error) {
 {{if ne .FieldCreateTime "" }}
-    if {{.StructSmallCamelName}}.{{.FieldCreateTime}}.IsZero() {
-		{{.StructSmallCamelName}}.{{.FieldCreateTime}} = time.Now()
+    if {{.StructName.LowerS}}.{{.FieldCreateTime}}.IsZero() {
+		{{.StructName.LowerS}}.{{.FieldCreateTime}} = time.Now()
 	}
 {{end}}
 {{if ne .FieldUpdateTime "" }}
-    if {{.StructSmallCamelName}}.{{.FieldUpdateTime}}.IsZero() {
-		{{.StructSmallCamelName}}.{{.FieldUpdateTime}} = time.Now()
+    if {{.StructName.LowerS}}.{{.FieldUpdateTime}}.IsZero() {
+		{{.StructName.LowerS}}.{{.FieldUpdateTime}} = time.Now()
 	}
 {{end}}
 	repo.db.WithContext(ctx).
-		Table(gormer.{{.StructName}}TableName).
-		Create({{.StructSmallCamelName}})
+		Table(gormer.{{.StructName.UpperS}}TableName).
+		Create({{.StructName.LowerS}})
 	err = repo.db.Error
 	return
 }
 
+func (repo *{{.StructName.UpperS}}Repo) Add{{.StructName.UpperS}}s(ctx context.Context, {{.StructName.LowerP}} []*gormer.{{.StructName.UpperS}}) (err error) {
+	for i := range {{.StructName.LowerP}} {
+		{{if ne .FieldCreateTime "" }}
+    if {{.StructName.LowerP}}[i].{{.FieldCreateTime}}.IsZero() {
+		{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now()
+	}
+	{{end}}
+	{{if ne .FieldUpdateTime "" }}
+    if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}}.IsZero() {
+		{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now()
+	}
+	{{end}}
+	}
+	
+	
+	repo.db.WithContext(ctx).
+		Table(gormer.{{.StructName.UpperS}}TableName).
+		Create({{.StructName.LowerP}})
+	err = repo.db.Error
+	return
+}
 `
-	daoTmplQuery = `func (repo *{{.StructName}}Repo) Query{{.StructName}}s(ctx context.Context, pageNumber, pageSize int, condition *gormer.{{.StructName}}Options) ({{.StructSmallCamelName}}s []gormer.{{.StructName}}, err error) {
+	daoTmplQuery = `
+func (repo *{{.StructName.UpperS}}Repo) Query{{.StructName.UpperP}}(ctx context.Context, pageNumber, pageSize int, condition *gormer.{{.StructName.UpperS}}Options) ({{.StructName.LowerP}} []gormer.{{.StructName.UpperS}}, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.{{.StructName}}, condition.Fields)
+		db = db.Where(condition.{{.StructName.UpperS}}, condition.Fields)
 	}
 {{if ne .FieldSoftDeleteKey "" }}
-	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
+	db = db.Where("{{.TableSoftDeleteKey}} != ?", gormer.{{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted)
 {{ end }}
 	db.WithContext(ctx).
-		Table(gormer.{{.StructName}}TableName).
+		Table(gormer.{{.StructName.UpperS}}TableName).
 		Limit(pageSize).
 		Offset((pageNumber - 1) * pageSize).
-		Find(&{{.StructSmallCamelName}}s)
+		Find(&{{.StructName.LowerP}})
 	err = repo.db.Error
 	return
 }
 
 `
-	daoTmplCount = `func (repo *{{.StructName}}Repo) Count{{.StructName}}s(ctx context.Context, condition *gormer.{{.StructName}}Options) (count int64, err error) {
+	daoTmplCount = `func (repo *{{.StructName.UpperS}}Repo) Count{{.StructName.UpperS}}s(ctx context.Context, condition *gormer.{{.StructName.UpperS}}Options) (count int64, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.{{.StructName}}, condition.Fields)
+		db = db.Where(condition.{{.StructName.UpperS}}, condition.Fields)
 	}
 {{if ne .FieldSoftDeleteKey "" }}
-	db = db.Where("{{.TableSoftDeleteKey}} != ?", {{.TableSoftDeleteValue}})
+	db = db.Where("{{.TableSoftDeleteKey}} != ?", gormer.{{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted)
 {{ end }}
 	db.WithContext(ctx).
-		Table(gormer.{{.StructName}}TableName).
+		Table(gormer.{{.StructName.UpperS}}TableName).
 		Count(&count)
 	err = repo.db.Error
 	return
 }
 
 `
-	daoTmplUpdate = `func (repo *{{.StructName}}Repo) Update{{.StructName}}(ctx context.Context, updated, condition *gormer.{{.StructName}}Options) (err error) {
+	daoTmplUpdate = `func (repo *{{.StructName.UpperS}}Repo) Update{{.StructName.UpperS}}(ctx context.Context, updated, condition *gormer.{{.StructName.UpperS}}Options) (err error) {
 	if updated == nil || len(updated.Fields) == 0 {
 		return errors.New("update must choose certain fields")
 	} else if condition == nil {
 		return errors.New("update must include where condition")
 	}
 {{if ne .FieldUpdateTime "" }}
-    if updated.{{.StructName}}.{{.FieldUpdateTime}}.IsZero() {
-		updated.{{.StructName}}.{{.FieldUpdateTime}} = time.Now()
+    if updated.{{.StructName.UpperS}}.{{.FieldUpdateTime}}.IsZero() {
+		updated.{{.StructName.UpperS}}.{{.FieldUpdateTime}} = time.Now()
 		updated.Fields = append(updated.Fields, "{{.TableUpdateTime}}")
 	}
 {{end}}
 	repo.db.WithContext(ctx).
-		Table(gormer.{{.StructName}}TableName).
-		Where(condition.{{.StructName}}, condition.Fields).
+		Table(gormer.{{.StructName.UpperS}}TableName).
+		Where(condition.{{.StructName.UpperS}}, condition.Fields).
 		Select(updated.Fields).
-		Updates(updated.{{.StructName}})
+		Updates(updated.{{.StructName.UpperS}})
 	err = repo.db.Error
 	return
 }
 
 `
-	daoTmplDelete = `func (repo *{{.StructName}}Repo) Delete{{.StructName}}(ctx context.Context, condition *gormer.{{.StructName}}Options) (err error) {
+	daoTmplDelete = `func (repo *{{.StructName.UpperS}}Repo) Delete{{.StructName.UpperS}}(ctx context.Context, condition *gormer.{{.StructName.UpperS}}Options) (err error) {
 	if condition == nil {
 		return errors.New("delete must include where condition")
 	}
 
 	repo.db.WithContext(ctx).
-        Table(gormer.{{.StructName}}TableName).
-		Where(condition.{{.StructName}}, condition.Fields).
-{{if eq .FieldSoftDeleteKey "" }} Delete(&gormer.{{.StructName}}{})
+        Table(gormer.{{.StructName.UpperS}}TableName).
+		Where(condition.{{.StructName.UpperS}}, condition.Fields).
+{{if eq .FieldSoftDeleteKey "" }} Delete(&gormer.{{.StructName.UpperS}}{})
 {{ else }}  {{if eq .FieldUpdateTime "" }}
 				Select("{{.TableSoftDeleteKey}}").
-				Updates(&gormer.{{.StructName}}{
-					{{.FieldSoftDeleteKey}}:{{.TableSoftDeleteValue}},
+				Updates(&gormer.{{.StructName.UpperS}}{
+					{{.FieldSoftDeleteKey}}:gormer.{{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted,
 				})
             {{ else }}
                 Select("{{.TableSoftDeleteKey}}","{{.TableUpdateTime}}").
-				Updates(&gormer.{{.StructName}}{
-					{{.FieldSoftDeleteKey}}:{{.TableSoftDeleteValue}},
+				Updates(&gormer.{{.StructName.UpperS}}{
+					{{.FieldSoftDeleteKey}}:gormer.{{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted,
 					{{.FieldUpdateTime}} : time.Now(),
 				})
             {{ end }}
@@ -136,5 +159,30 @@ var _ model.{{.StructName}}Model = New{{.StructName}}Repo(nil)
 }
 
 `
-	daoTmpl = daoTmplRepo + daoTmplAdd + daoTmplQuery + daoTmplCount + daoTmplUpdate + daoTmplDelete
+
+	daoTmplGenQuery = `
+{{range $item := .GenQueries}}
+// Query{{$item.Method}} {{$item.Desc}}
+func (repo *{{$.StructName.UpperS}}Repo) Query{{$item.Method}}(ctx context.Context,{{range $match := $item.Args}} {{$match.Name}} {{$match.Type}}, {{end}}pageNumber, pageSize int, condition *gormer.{{$.StructName.UpperS}}Options) ({{$.StructName.LowerP}} []gormer.{{$.StructName.UpperS}}, err error) {
+	
+	{{if ne $item.Where "" }} repo.db = repo.db.Where("{{$item.Where}}",{{$c := counter}}{{range $match := $item.Args}} {{if call $c}}, {{end}}{{$match.Name}} {{end}})
+	{{ end }}
+	{{if ne $item.OrderBy "" }} repo.db = repo.db.Order("{{$item.OrderBy}}")
+	{{ end }}
+
+	return repo.Query{{$.StructName.UpperP}}(ctx, pageNumber, pageSize, condition)
+}
+
+// Count{{$item.Method}} {{$item.Desc}}
+func (repo *{{$.StructName.UpperS}}Repo) Count{{$item.Method}}(ctx context.Context,{{range $match := $item.Args}} {{$match.Name}} {{$match.Type}}, {{end}} condition *gormer.{{$.StructName.UpperS}}Options) (count int64, err error) {
+	
+	{{if ne $item.Where "" }} repo.db = repo.db.Where("{{$item.Where}}",{{$c := counter}}{{range $match := $item.Args}} {{if call $c}}, {{end}}{{$match.Name}} {{end}})
+	{{ end }}
+
+	return repo.Count{{$.StructName.UpperP}}(ctx, condition)
+}
+{{end}}
+`
+
+	daoTmpl = daoTmplRepo + daoTmplAdd + daoTmplQuery + daoTmplCount + daoTmplUpdate + daoTmplDelete + daoTmplGenQuery
 )

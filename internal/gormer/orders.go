@@ -18,6 +18,8 @@ const (
 	OrderFieldDeleteStatus OrderField = "delete_status"
 )
 
+const OrderDeleteStatusSoftDeleted = 1
+
 var OrderFieldAll = []OrderField{"id", "name", "price", "create_time", "update_time", "delete_status"}
 
 // Kernel struct for table for one row

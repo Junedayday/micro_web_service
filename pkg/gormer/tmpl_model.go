@@ -6,6 +6,7 @@ package %s
 
 import (
 	"context"
+	"time"
 	
 	"%s/%s"
 )
@@ -19,15 +20,23 @@ import (
 
 var (
 	modelTmpl = `
-type {{.StructName}}Model interface {
-	Add{{.StructName}}(ctx context.Context, {{.StructSmallCamelName}} *gormer.{{.StructName}}) (err error)
-	Query{{.StructName}}s(ctx context.Context, pageNumber, pageSize int, condition *gormer.{{.StructName}}Options) ({{.StructSmallCamelName}}s []gormer.{{.StructName}}, err error)
-	Count{{.StructName}}s(ctx context.Context, condition *gormer.{{.StructName}}Options) (count int64, err error)
-	Update{{.StructName}}(ctx context.Context, updated, condition *gormer.{{.StructName}}Options) (err error)
-	Delete{{.StructName}}(ctx context.Context, condition *gormer.{{.StructName}}Options) (err error)
+type {{.StructName.UpperS}}Model interface {
+	Add{{.StructName.UpperS}}(ctx context.Context, {{.StructName.LowerS}} *gormer.{{.StructName.UpperS}}) (err error)
+	Add{{.StructName.UpperP}}(ctx context.Context, {{.StructName.LowerP}} []*gormer.{{.StructName.UpperS}}) (err error)
+	Query{{.StructName.UpperS}}s(ctx context.Context, pageNumber, pageSize int, condition *gormer.{{.StructName.UpperS}}Options) ({{.StructName.LowerS}}s []gormer.{{.StructName.UpperS}}, err error)
+	Count{{.StructName.UpperS}}s(ctx context.Context, condition *gormer.{{.StructName.UpperS}}Options) (count int64, err error)
+	Update{{.StructName.UpperS}}(ctx context.Context, updated, condition *gormer.{{.StructName.UpperS}}Options) (err error)
+	Delete{{.StructName.UpperS}}(ctx context.Context, condition *gormer.{{.StructName.UpperS}}Options) (err error)
 	
+	// Defined in genQueries
+	
+	{{range $item := .GenQueries}} // Query{{$item.Method}} {{$item.Desc}}
+	Query{{$item.Method}}(ctx context.Context,{{range $match := $item.Args}} {{$match.Name}} {{$match.Type}}, {{end}}pageNumber, pageSize int, condition *gormer.{{$.StructName.UpperS}}Options) ({{$.StructName.LowerP}} []gormer.{{$.StructName.UpperS}}, err error)
+	// Count{{$item.Method}} {{$item.Desc}}
+	Count{{$item.Method}}(ctx context.Context,{{range $match := $item.Args}} {{$match.Name}} {{$match.Type}}, {{end}}condition *gormer.{{$.StructName.UpperS}}Options) (count int64, err error)
+	{{end}}
 	// Implement Your Method in ext model
-	{{.StructName}}ExtModel
+	{{.StructName.UpperS}}ExtModel
 }
 `
 	modelExtTmpl = `

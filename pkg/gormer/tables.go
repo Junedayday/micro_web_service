@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
 )
 
@@ -33,41 +34,6 @@ var tableToGoStruct = map[string]string{
 	"text":      "string",
 }
 
-type StructLevel struct {
-	// table -> struct
-	TableName            string
-	StructName           string
-	StructSmallCamelName string
-
-	// table column -> struct field
-	Columns []FieldLevel
-
-	// create time
-	TableCreateTime string
-	FieldCreateTime string
-
-	// update time
-	TableUpdateTime string
-	FieldUpdateTime string
-
-	// soft delete
-	TableSoftDeleteKey   string
-	TableSoftDeleteValue int
-	FieldSoftDeleteKey   string
-
-	// add log
-	LogOn bool
-}
-
-type FieldLevel struct {
-	FieldName string
-	FieldType string
-	// gorm tag for field
-	GormName string
-	// comment from create table sql
-	Comment string
-}
-
 func getAllTables(db *sql.DB) ([]string, error) {
 	rows, err := db.Query(showTablesSQL)
 	if err != nil {
@@ -90,11 +56,16 @@ func getAllTables(db *sql.DB) ([]string, error) {
 
 func Generate(db *sql.DB, table string, matchInfo TableInfo) (StructLevel, error) {
 	var structData = StructLevel{
-		TableName:  table,
-		StructName: camelCase(matchInfo.GoStruct),
+		TableName: table,
 	}
+	structName := camelCase(matchInfo.GoStruct)
+	camelStructName := string(unicode.ToUpper(rune(structName[0]))) + structName[1:]
+	structData.StructName.UpperS = inflection.Singular(structName)
+	structData.StructName.UpperP = inflection.Plural(structName)
 
-	structData.StructSmallCamelName = string(unicode.ToLower(rune(structData.StructName[0]))) + structData.StructName[1:]
+	camelStructName = string(unicode.ToLower(rune(structName[0]))) + structName[1:]
+	structData.StructName.LowerS = inflection.Singular(camelStructName)
+	structData.StructName.LowerP = inflection.Plural(camelStructName)
 
 	rows, err := db.Query(fmt.Sprintf(showCreateTableSQL, table))
 	if err != nil {
@@ -125,6 +96,7 @@ func Generate(db *sql.DB, table string, matchInfo TableInfo) (StructLevel, error
 			structData.FieldSoftDeleteKey = v.FieldName
 		}
 	}
+	structData.GenQueries = matchInfo.GenQueries
 	return structData, nil
 }
 

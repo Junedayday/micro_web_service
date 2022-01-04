@@ -16,6 +16,31 @@ database:
       updateTime: "update_time"
       softDeleteKey: "delete_status"
       softDeleteValue: 1
+      # genQueries会自动生成Query{method}+Count{method}两种方法
+      # desc备注信息
+      # where+args查询参数
+      # orderBy排序方式
+      genQueries:
+        - method: "OrdersDesc"
+          desc: "根据id逆序查询"
+          orderBy: "id desc"
+        - method: "OrdersByNamesAndCreateTime"
+          desc: "根据名称和创建时间查询"
+          where: "name in (?) and create_time > (?)"
+          args:
+            - name: "names"
+              type: "[]string"
+            - name: "createTime"
+              type: "time.Time"
+          orderBy: "id desc"
+        - method: "OrdersByTimeRange"
+          desc: "根据创建时间的范围查询"
+          where: "create_time > (?) and create_time < (?)"
+          args:
+            - name: "startTime"
+              type: "time.Time"
+            - name: "endTime"
+              type: "time.Time"
 
 # 项目相关的信息
 project:

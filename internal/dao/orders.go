@@ -39,13 +39,33 @@ func (repo *OrderRepo) AddOrder(ctx context.Context, order *gormer.Order) (err e
 	return
 }
 
+func (repo *OrderRepo) AddOrders(ctx context.Context, orders []*gormer.Order) (err error) {
+	for i := range orders {
+
+		if orders[i].CreateTime.IsZero() {
+			orders[i].CreateTime = time.Now()
+		}
+
+		if orders[i].UpdateTime.IsZero() {
+			orders[i].UpdateTime = time.Now()
+		}
+
+	}
+
+	repo.db.WithContext(ctx).
+		Table(gormer.OrderTableName).
+		Create(orders)
+	err = repo.db.Error
+	return
+}
+
 func (repo *OrderRepo) QueryOrders(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
 	db := repo.db
 	if condition != nil {
 		db = db.Where(condition.Order, condition.Fields)
 	}
 
-	db = db.Where("delete_status != ?", 1)
+	db = db.Where("delete_status != ?", gormer.OrderDeleteStatusSoftDeleted)
 
 	db.WithContext(ctx).
 		Table(gormer.OrderTableName).
@@ -62,7 +82,7 @@ func (repo *OrderRepo) CountOrders(ctx context.Context, condition *gormer.OrderO
 		db = db.Where(condition.Order, condition.Fields)
 	}
 
-	db = db.Where("delete_status != ?", 1)
+	db = db.Where("delete_status != ?", gormer.OrderDeleteStatusSoftDeleted)
 
 	db.WithContext(ctx).
 		Table(gormer.OrderTableName).
@@ -102,10 +122,58 @@ func (repo *OrderRepo) DeleteOrder(ctx context.Context, condition *gormer.OrderO
 		Where(condition.Order, condition.Fields).
 		Select("delete_status", "update_time").
 		Updates(&gormer.Order{
-			DeleteStatus: 1,
+			DeleteStatus: gormer.OrderDeleteStatusSoftDeleted,
 			UpdateTime:   time.Now(),
 		})
 
 	err = repo.db.Error
 	return
+}
+
+// QueryOrdersDesc 根据id逆序查询
+func (repo *OrderRepo) QueryOrdersDesc(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
+
+	repo.db = repo.db.Order("id desc")
+
+	return repo.QueryOrders(ctx, pageNumber, pageSize, condition)
+}
+
+// CountOrdersDesc 根据id逆序查询
+func (repo *OrderRepo) CountOrdersDesc(ctx context.Context, condition *gormer.OrderOptions) (count int64, err error) {
+
+	return repo.CountOrders(ctx, condition)
+}
+
+// QueryOrdersByNamesAndCreateTime 根据名称和创建时间查询
+func (repo *OrderRepo) QueryOrdersByNamesAndCreateTime(ctx context.Context, names []string, createTime time.Time, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
+
+	repo.db = repo.db.Where("name in (?) and create_time > (?)", names, createTime)
+
+	repo.db = repo.db.Order("id desc")
+
+	return repo.QueryOrders(ctx, pageNumber, pageSize, condition)
+}
+
+// CountOrdersByNamesAndCreateTime 根据名称和创建时间查询
+func (repo *OrderRepo) CountOrdersByNamesAndCreateTime(ctx context.Context, names []string, createTime time.Time, condition *gormer.OrderOptions) (count int64, err error) {
+
+	repo.db = repo.db.Where("name in (?) and create_time > (?)", names, createTime)
+
+	return repo.CountOrders(ctx, condition)
+}
+
+// QueryOrdersByTimeRange 根据创建时间的范围查询
+func (repo *OrderRepo) QueryOrdersByTimeRange(ctx context.Context, startTime time.Time, endTime time.Time, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
+
+	repo.db = repo.db.Where("create_time > (?) and create_time < (?)", startTime, endTime)
+
+	return repo.QueryOrders(ctx, pageNumber, pageSize, condition)
+}
+
+// CountOrdersByTimeRange 根据创建时间的范围查询
+func (repo *OrderRepo) CountOrdersByTimeRange(ctx context.Context, startTime time.Time, endTime time.Time, condition *gormer.OrderOptions) (count int64, err error) {
+
+	repo.db = repo.db.Where("create_time > (?) and create_time < (?)", startTime, endTime)
+
+	return repo.CountOrders(ctx, condition)
 }
