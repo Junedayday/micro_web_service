@@ -7,6 +7,7 @@ require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.2
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/google/wire v0.5.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.3.0
 	github.com/jinzhu/inflection v1.0.0

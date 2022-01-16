@@ -2,7 +2,8 @@ package mysql
 
 import (
 	"fmt"
-
+	
+	`github.com/DATA-DOG/go-sqlmock`
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -38,4 +39,22 @@ func afterLog(db *gorm.DB) {
 		return
 	}
 	zlog.WithTrace(ctx).Infof("sql=%s", sql)
+}
+
+
+func NewMockDB() *gorm.DB{
+	db,_, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	if err != nil {
+		panic(err)
+	}
+	
+	gormDB, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	
+	return gormDB
 }
