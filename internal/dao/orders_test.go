@@ -4,17 +4,17 @@ import (
 	"context"
 	"testing"
 	"time"
-	
+
 	"github.com/stretchr/testify/assert"
-	
+
 	"github.com/Junedayday/micro_web_service/internal/gormer"
 )
 
 var (
-	order = &gormer.Order{Name: "order1", Price: 1.1, CreateTime: time.Now(), UpdateTime: time.Now()}
+	order      = &gormer.Order{Name: "order1", Price: 1.1, CreateTime: time.Now(), UpdateTime: time.Now()}
 	page, size = 2, 10
-	updated = gormer.NewOrderOptions(&gormer.Order{Name: "test_name", UpdateTime: time.Now()}, gormer.OrderFieldName, gormer.OrderFieldUpdateTime)
-	condition = gormer.NewOrderOptions(&gormer.Order{Price: 1.0}, gormer.OrderFieldPrice)
+	updated    = gormer.NewOrderOptions(&gormer.Order{Name: "test_name", UpdateTime: time.Now()}, gormer.OrderFieldName, gormer.OrderFieldUpdateTime)
+	condition  = gormer.NewOrderOptions(&gormer.Order{Price: 1.0}, gormer.OrderFieldPrice)
 )
 
 func TestOrderRepo_AddOrder(t *testing.T) {
@@ -31,7 +31,7 @@ func TestOrderRepo_QueryOrders(t *testing.T) {
 
 func TestOrderRepo_CountOrders(t *testing.T) {
 	orderRepo := InitializeMockOrderRepo()
-	_ , err := orderRepo.CountOrders(context.Background(), condition)
+	_, err := orderRepo.CountOrders(context.Background(), condition)
 	assert.Nil(t, err)
 }
 

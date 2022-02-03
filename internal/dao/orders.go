@@ -147,6 +147,11 @@ func (repo *OrderRepo) CountOrdersDesc(ctx context.Context, condition *gormer.Or
 // QueryOrdersByNamesAndCreateTime 根据名称和创建时间查询
 func (repo *OrderRepo) QueryOrdersByNamesAndCreateTime(ctx context.Context, names []string, createTime time.Time, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
 
+	repo.db = repo.db.Select(
+		gormer.OrderFieldId,
+		gormer.OrderFieldName,
+	)
+
 	repo.db = repo.db.Where("name in (?) and create_time > (?)", names, createTime)
 
 	repo.db = repo.db.Order("id desc")

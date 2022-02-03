@@ -16,7 +16,7 @@ type OrderModel interface {
 	UpdateOrder(ctx context.Context, updated, condition *gormer.OrderOptions) (err error)
 	DeleteOrder(ctx context.Context, condition *gormer.OrderOptions) (err error)
 
-	// defined in genQueries in gormer.yaml
+	// Defined in genQueries
 
 	// QueryOrdersDesc 根据id逆序查询
 	QueryOrdersDesc(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error)

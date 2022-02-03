@@ -75,11 +75,31 @@ func main() {
 			fmt.Printf("table %s ignored\n", table)
 			continue
 		}
+
 		// 1.生成结构
 		structResult, err := Generate(db, table, tMatcher[table])
 		if err != nil {
-			fmt.Printf("Generate table %s error %+v", table, err)
+			fmt.Printf("Generate table %s error %+v\n", table, err)
 			os.Exit(1)
+		}
+
+		// 检查字段的有效性
+		fieldMap := make(map[string]FieldLevel)
+		for _, column := range structResult.Columns {
+			fieldMap[column.GormName] = column
+		}
+		for i, gen := range tMatcher[table].GenQueries {
+			if gen.Fields != "" {
+				fields := strings.Split(gen.Fields, ",")
+				for _, field := range fields {
+					if fieldDetail, ok := fieldMap[strings.TrimSpace(field)]; !ok {
+						fmt.Printf("Field %s not match table %s\n", strings.TrimSpace(field), table)
+						os.Exit(1)
+					} else {
+						tMatcher[table].GenQueries[i].GenFields = append(tMatcher[table].GenQueries[i].GenFields, fieldDetail.FieldName)
+					}
+				}
+			}
 		}
 
 		// 2.生成gormer file

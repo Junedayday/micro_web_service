@@ -18,6 +18,7 @@ database:
       softDeleteValue: 1
       # genQueries会自动生成Query{method}+Count{method}两种方法
       # desc备注信息
+      # fields查询的字段
       # where+args查询参数
       # orderBy排序方式
       genQueries:
@@ -26,6 +27,7 @@ database:
           orderBy: "id desc"
         - method: "OrdersByNamesAndCreateTime"
           desc: "根据名称和创建时间查询"
+          fields: "id,name"
           where: "name in (?) and create_time > (?)"
           args:
             - name: "names"

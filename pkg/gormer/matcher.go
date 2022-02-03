@@ -13,11 +13,13 @@ type TableInfo struct {
 }
 
 type GenQuery struct {
-	Method  string
-	Desc    string
-	Where   string
-	Args    []ArgInfo
-	OrderBy string
+	Method    string
+	Desc      string
+	Fields    string
+	GenFields []string
+	Where     string
+	Args      []ArgInfo
+	OrderBy   string
 }
 
 type ArgInfo struct {

@@ -165,6 +165,10 @@ func (repo *{{.StructName.UpperS}}Repo) Query{{.StructName.UpperP}}(ctx context.
 // Query{{$item.Method}} {{$item.Desc}}
 func (repo *{{$.StructName.UpperS}}Repo) Query{{$item.Method}}(ctx context.Context,{{range $match := $item.Args}} {{$match.Name}} {{$match.Type}}, {{end}}pageNumber, pageSize int, condition *gormer.{{$.StructName.UpperS}}Options) ({{$.StructName.LowerP}} []gormer.{{$.StructName.UpperS}}, err error) {
 	
+	{{if ne $item.Fields "" }} repo.db = repo.db.Select(
+	{{range $match := $item.GenFields}}gormer.{{$.StructName.UpperS}}Field{{$match}},
+	{{end}})
+	{{end}}
 	{{if ne $item.Where "" }} repo.db = repo.db.Where("{{$item.Where}}",{{$c := counter}}{{range $match := $item.Args}} {{if call $c}}, {{end}}{{$match.Name}} {{end}})
 	{{ end }}
 	{{if ne $item.OrderBy "" }} repo.db = repo.db.Order("{{$item.OrderBy}}")
