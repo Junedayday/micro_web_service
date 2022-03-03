@@ -3,6 +3,7 @@ package main
 var tableInfo []TableInfo
 
 type TableInfo struct {
+	CreateSQL       string     `yaml:"createSQL"`
 	Name            string     `yaml:"name"`
 	GoStruct        string     `yaml:"goStruct"`
 	CreateTime      string     `yaml:"createTime"`

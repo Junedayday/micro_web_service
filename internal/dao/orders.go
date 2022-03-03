@@ -40,16 +40,17 @@ func (repo *OrderRepo) AddOrder(ctx context.Context, order *gormer.Order) (err e
 }
 
 func (repo *OrderRepo) AddOrders(ctx context.Context, orders []*gormer.Order) (err error) {
-	for i := range orders {
 
+	for i := range orders {
 		if orders[i].CreateTime.IsZero() {
 			orders[i].CreateTime = time.Now()
 		}
+	}
 
+	for i := range orders {
 		if orders[i].UpdateTime.IsZero() {
 			orders[i].UpdateTime = time.Now()
 		}
-
 	}
 
 	repo.db.WithContext(ctx).
@@ -62,7 +63,9 @@ func (repo *OrderRepo) AddOrders(ctx context.Context, orders []*gormer.Order) (e
 func (repo *OrderRepo) QueryOrders(ctx context.Context, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.Order, condition.Fields)
+		for _, field := range condition.Fields {
+			db.Where(field+" = ?", condition.Order.GetValueByField(gormer.OrderField(field)))
+		}
 	}
 
 	db = db.Where("delete_status != ?", gormer.OrderDeleteStatusSoftDeleted)
@@ -79,7 +82,9 @@ func (repo *OrderRepo) QueryOrders(ctx context.Context, pageNumber, pageSize int
 func (repo *OrderRepo) CountOrders(ctx context.Context, condition *gormer.OrderOptions) (count int64, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.Order, condition.Fields)
+		for _, field := range condition.Fields {
+			db.Where(field+" = ?", condition.Order.GetValueByField(gormer.OrderField(field)))
+		}
 	}
 
 	db = db.Where("delete_status != ?", gormer.OrderDeleteStatusSoftDeleted)
@@ -146,11 +151,6 @@ func (repo *OrderRepo) CountOrdersDesc(ctx context.Context, condition *gormer.Or
 
 // QueryOrdersByNamesAndCreateTime 根据名称和创建时间查询
 func (repo *OrderRepo) QueryOrdersByNamesAndCreateTime(ctx context.Context, names []string, createTime time.Time, pageNumber, pageSize int, condition *gormer.OrderOptions) (orders []gormer.Order, err error) {
-
-	repo.db = repo.db.Select(
-		gormer.OrderFieldId,
-		gormer.OrderFieldName,
-	)
 
 	repo.db = repo.db.Where("name in (?) and create_time > (?)", names, createTime)
 

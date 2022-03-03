@@ -67,20 +67,25 @@ func Generate(db *sql.DB, table string, matchInfo TableInfo) (StructLevel, error
 	structData.StructName.LowerS = inflection.Singular(camelStructName)
 	structData.StructName.LowerP = inflection.Plural(camelStructName)
 
-	rows, err := db.Query(fmt.Sprintf(showCreateTableSQL, table))
-	if err != nil {
-		return structData, errors.Wrapf(err, "show table failed")
-	}
-	defer rows.Close()
-
-	var t, s string
-	for rows.Next() {
-		err = rows.Scan(&t, &s)
+	var createSQL = matchInfo.CreateSQL
+	if createSQL == "" && db != nil {
+		rows, err := db.Query(fmt.Sprintf(showCreateTableSQL, table))
 		if err != nil {
-			return structData, err
+			return structData, errors.Wrapf(err, "show table failed")
 		}
-		structData.Columns = parseTable(s)
+		defer rows.Close()
+
+		var t string
+		for rows.Next() {
+			err = rows.Scan(&t, &createSQL)
+			if err != nil {
+				return structData, err
+			}
+		}
+	} else {
+		createSQL = matchInfo.CreateSQL
 	}
+	structData.Columns = parseTable(createSQL)
 
 	for _, v := range structData.Columns {
 		switch v.GormName {

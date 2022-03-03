@@ -41,7 +41,7 @@ func main() {
 		// daoLogPackage = Viper.GetString("project.log.package")
 	)
 
-	if dsn == "" || projectPath == "" || gormPath == "" || daoPath == "" || modelPath == "" || goMod == "" {
+	if projectPath == "" || gormPath == "" || daoPath == "" || modelPath == "" || goMod == "" {
 		fmt.Println("dsn,projectPath,gormPath,daoPath,modelPath,goMod 为必填参数，请检查")
 		os.Exit(1)
 	}
@@ -51,29 +51,41 @@ func main() {
 		os.MkdirAll(path, os.ModePerm)
 	}
 
-	// 连接mysql
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		panic(err)
+	var (
+		tables   []string
+		tMatcher map[string]TableInfo
+		db       *sql.DB
+	)
+	if dsn != "" {
+		// 连接mysql
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			panic(err)
+		}
+		defer db.Close()
+
+		fmt.Println("start to generate gorm structs")
+
+		// 读取数据库中的表
+		tables, err = getAllTables(db)
+		if err != nil {
+			fmt.Printf("getAllTables error %+v", err)
+			os.Exit(1)
+		}
+	} else {
+		for _, v := range tableInfo {
+			tables = append(tables, v.Name)
+		}
 	}
-	defer db.Close()
-
-	fmt.Println("start to generate gorm structs")
-
-	// 读取数据库中的表
-	tables, err := getAllTables(db)
-	if err != nil {
-		fmt.Printf("getAllTables error %+v", err)
-		os.Exit(1)
-	}
-
-	tMatcher := getTableMatcher()
+	tMatcher = getTableMatcher()
 
 	for _, table := range tables {
 		// 不存在的表直接过滤
-		if _, ok := tMatcher[table]; !ok {
-			fmt.Printf("table %s ignored\n", table)
-			continue
+		if tMatcher != nil {
+			if _, ok := tMatcher[table]; !ok {
+				fmt.Printf("table %s ignored\n", table)
+				continue
+			}
 		}
 
 		// 1.生成结构
@@ -88,6 +100,7 @@ func main() {
 		for _, column := range structResult.Columns {
 			fieldMap[column.GormName] = column
 		}
+		fmt.Println(fieldMap)
 		for i, gen := range tMatcher[table].GenQueries {
 			if gen.Fields != "" {
 				fields := strings.Split(gen.Fields, ",")

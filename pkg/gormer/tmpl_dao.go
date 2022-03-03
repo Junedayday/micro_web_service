@@ -54,18 +54,21 @@ func (repo *{{.StructName.UpperS}}Repo) Add{{.StructName.UpperS}}(ctx context.Co
 }
 
 func (repo *{{.StructName.UpperS}}Repo) Add{{.StructName.UpperS}}s(ctx context.Context, {{.StructName.LowerP}} []*gormer.{{.StructName.UpperS}}) (err error) {
+	{{if ne .FieldCreateTime "" }}
 	for i := range {{.StructName.LowerP}} {
-		{{if ne .FieldCreateTime "" }}
-    if {{.StructName.LowerP}}[i].{{.FieldCreateTime}}.IsZero() {
-		{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now()
+        if {{.StructName.LowerP}}[i].{{.FieldCreateTime}}.IsZero() {
+			{{.StructName.LowerP}}[i].{{.FieldCreateTime}} = time.Now()
+		}
 	}
 	{{end}}
+	
 	{{if ne .FieldUpdateTime "" }}
-    if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}}.IsZero() {
-		{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now()
+	for i := range {{.StructName.LowerP}} {
+        if {{.StructName.LowerP}}[i].{{.FieldUpdateTime}}.IsZero() {
+			{{.StructName.LowerP}}[i].{{.FieldUpdateTime}} = time.Now()
+		}
 	}
 	{{end}}
-	}
 	
 	
 	repo.db.WithContext(ctx).
@@ -79,7 +82,9 @@ func (repo *{{.StructName.UpperS}}Repo) Add{{.StructName.UpperS}}s(ctx context.C
 func (repo *{{.StructName.UpperS}}Repo) Query{{.StructName.UpperP}}(ctx context.Context, pageNumber, pageSize int, condition *gormer.{{.StructName.UpperS}}Options) ({{.StructName.LowerP}} []gormer.{{.StructName.UpperS}}, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.{{.StructName.UpperS}}, condition.Fields)
+		for _, field := range condition.Fields {
+	        db.Where(field + " = ?", condition.{{.StructName.UpperS}}.GetValueByField(gormer.{{.StructName.UpperS}}Field(field)))
+		}
 	}
 {{if ne .FieldSoftDeleteKey "" }}
 	db = db.Where("{{.TableSoftDeleteKey}} != ?", gormer.{{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted)
@@ -97,7 +102,9 @@ func (repo *{{.StructName.UpperS}}Repo) Query{{.StructName.UpperP}}(ctx context.
 	daoTmplCount = `func (repo *{{.StructName.UpperS}}Repo) Count{{.StructName.UpperS}}s(ctx context.Context, condition *gormer.{{.StructName.UpperS}}Options) (count int64, err error) {
 	db := repo.db
 	if condition != nil {
-		db = db.Where(condition.{{.StructName.UpperS}}, condition.Fields)
+	    for _, field := range condition.Fields {
+	        db.Where(field + " = ?", condition.{{.StructName.UpperS}}.GetValueByField(gormer.{{.StructName.UpperS}}Field(field)))
+		}
 	}
 {{if ne .FieldSoftDeleteKey "" }}
 	db = db.Where("{{.TableSoftDeleteKey}} != ?", gormer.{{.StructName.UpperS}}{{.FieldSoftDeleteKey}}SoftDeleted)
@@ -165,10 +172,6 @@ func (repo *{{.StructName.UpperS}}Repo) Query{{.StructName.UpperP}}(ctx context.
 // Query{{$item.Method}} {{$item.Desc}}
 func (repo *{{$.StructName.UpperS}}Repo) Query{{$item.Method}}(ctx context.Context,{{range $match := $item.Args}} {{$match.Name}} {{$match.Type}}, {{end}}pageNumber, pageSize int, condition *gormer.{{$.StructName.UpperS}}Options) ({{$.StructName.LowerP}} []gormer.{{$.StructName.UpperS}}, err error) {
 	
-	{{if ne $item.Fields "" }} repo.db = repo.db.Select(
-	{{range $match := $item.GenFields}}gormer.{{$.StructName.UpperS}}Field{{$match}},
-	{{end}})
-	{{end}}
 	{{if ne $item.Where "" }} repo.db = repo.db.Where("{{$item.Where}}",{{$c := counter}}{{range $match := $item.Args}} {{if call $c}}, {{end}}{{$match.Name}} {{end}})
 	{{ end }}
 	{{if ne $item.OrderBy "" }} repo.db = repo.db.Order("{{$item.OrderBy}}")

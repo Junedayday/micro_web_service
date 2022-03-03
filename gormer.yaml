@@ -1,16 +1,29 @@
 # 数据库相关的信息
 database:
-  # 数据库连接
-  dsn: "root:123456@tcp(127.0.0.1:3306)/demo"
+  # 数据库连接，为空时则用各个tables中的createSQL生成
+  dsn: ""
+#  dsn: "root:123456@tcp(127.0.0.1:3306)/demo"
   # 所有要生成到Go结构体中的表
   tables:
+    # createSQL-建表语句，当dsn为空时生效
     # name-表名
     # goStruct-Go中结构体名
     # createTime-创建时间的数据库字段，必须为时间格式
     # updateTime-更新时间的数据库字段，必须为时间格式
     # softDeleteKey-软删除的数据库字段，必须为整数型，不填则为硬删除
     # softDeleteValue-表示为软删除的对应值
-    - name: "orders"
+    - createSQL: |
+        CREATE TABLE `orders` (
+          `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+          `name` varchar(255) DEFAULT NULL COMMENT '名称，建议唯一',
+          `price` decimal(15,3) DEFAULT NULL COMMENT '订单价格',
+          `create_time` timestamp NULL DEFAULT NULL COMMENT '创建时间',
+          `update_time` timestamp NULL DEFAULT NULL COMMENT '更新时间',
+          `delete_status` tinyint(3) DEFAULT NULL COMMENT '删除状态，1表示软删除',
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COMMENT='订单信息表';
+
+      name: "orders"
       goStruct: "Order"
       createTime: "create_time"
       updateTime: "update_time"
